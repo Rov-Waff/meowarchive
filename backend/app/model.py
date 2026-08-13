@@ -1,6 +1,9 @@
+from sqlalchemy.ext.asyncio import create_async_engine
+from sqlmodel.ext.asyncio.session import AsyncSession
+import os
 from datetime import datetime
 
-from sqlmodel import Field, Relationship, SQLModel
+from sqlmodel import Field, Relationship, SQLModel, create_engine
 
 
 class User(SQLModel, table=True):
@@ -72,3 +75,10 @@ class Comments(SQLModel, table=True):
     reply:Replies = Relationship(back_populates="comments")
     reply_user_id: int | None = Field(foreign_key="user.id")
     user_id: int = Field(foreign_key="user.id")
+
+engine = create_async_engine(os.getenv("DB_URL",""))
+
+async def get_session():
+    async with AsyncSession(engine) as s:
+        yield s
+    
