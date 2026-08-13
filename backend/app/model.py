@@ -25,7 +25,7 @@ class Board(SQLModel, table=True):
     id: int = Field(primary_key=True)
     name: str
     is_hot: str
-    n_post: int
+    n_posts: int
     n_discussions: int
     posts: list["Posts"] = Relationship(back_populates="board")
 

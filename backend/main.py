@@ -1,5 +1,7 @@
+import dotenv
 import uvicorn
 
-if __name__=="__main__":
+if __name__ == "__main__":
     # Develop Environment
-    uvicorn.run("app:app",host="127.0.0.1",port=8000,reload=True)
+    dotenv.load_dotenv()
+    uvicorn.run("app:app", host="127.0.0.1", port=8000, reload=True)
