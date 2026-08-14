@@ -33,11 +33,11 @@ async def get_paged_posts_in_board(
     page_num: int = Query(),
     sess: AsyncSession = Depends(get_session),
 ):
-    total_stmt = select(func.count()).select_from(Posts)
+    total_stmt = select(func.count()).select_from(Posts).where(Posts.board_id == id)
     total = (await sess.exec(total_stmt)).one()
     total_page = math.ceil(total / page_size)
     has_prev: bool = page_num > 1
-    has_next: bool = page_num == total_page
+    has_next: bool = page_num < total_page
     stmt = (
         select(Posts)
         .where(Posts.board_id == id)
