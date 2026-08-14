@@ -62,7 +62,7 @@ interface Post {
   tutorial_flag: 0;
   user: User;
   title: string;
-  content:string
+  content: string;
 }
 
 interface PageResult<T> {
