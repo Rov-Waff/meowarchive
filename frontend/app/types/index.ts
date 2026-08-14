@@ -37,7 +37,7 @@ interface Board {
 */
 interface User {
   id: number;
-  nickanem: string;
+  nickname: string;
   sex: number;
   doing: string;
   level: number;
@@ -62,6 +62,7 @@ interface Post {
   tutorial_flag: 0;
   user: User;
   title: string;
+  content:string
 }
 
 interface PageResult<T> {
