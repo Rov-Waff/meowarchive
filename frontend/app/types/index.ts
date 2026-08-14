@@ -1,11 +1,9 @@
 interface Board {
-
-    name: string
-    n_posts: number
-    id: number
-    is_hot: boolean
-    n_discussions: number
-
+  name: string;
+  n_posts: number;
+  id: number;
+  is_hot: boolean;
+  n_discussions: number;
 }
 /*
  {
@@ -38,38 +36,38 @@ interface Board {
       }
 */
 interface User {
-    id: number,
-    nickanem: string
-    sex: number
-    doing: string
-    level: number
-    collection_times: number
-    praise_times: number
-    description: string
-    forked_times: number
-    view_times: number
+  id: number;
+  nickanem: string;
+  sex: number;
+  doing: string;
+  level: number;
+  collection_times: number;
+  praise_times: number;
+  description: string;
+  forked_times: number;
+  view_times: number;
 }
 
 interface Post {
-    id: number
-    ask_help_flag: number
-    board_id: number
-    board_name: string
-    created_at: Date
-    is_authorized: boolean
-    is_pinned: boolean
-    n_comments: number
-    n_replies: number
-    n_views: number
-    tutorial_flag: 0,
-    user: User
-    title:string
+  id: number;
+  ask_help_flag: number;
+  board_id: number;
+  board_name: string;
+  created_at: Date;
+  is_authorized: boolean;
+  is_pinned: boolean;
+  n_comments: number;
+  n_replies: number;
+  n_views: number;
+  tutorial_flag: 0;
+  user: User;
+  title: string;
 }
 
-interface PageResult<T>{
-    total_page:number
-    current_page:number
-    has_prev:boolean
-    has_next:boolean
-    item:Array<T>
+interface PageResult<T> {
+  total_page: number;
+  current_page: number;
+  has_prev: boolean;
+  has_next: boolean;
+  item: Array<T>;
 }
