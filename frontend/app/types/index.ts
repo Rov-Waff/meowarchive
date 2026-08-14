@@ -72,3 +72,18 @@ interface PageResult<T> {
   has_next: boolean;
   item: Array<T>;
 }
+
+interface Reply {
+
+  content: string
+  created_at: Date
+  is_top: boolean
+  n_likes: number
+  update_at: Date
+  id: number
+  is_liked: boolean
+  n_comments: number
+  post_id: number
+  user_id: number
+
+}

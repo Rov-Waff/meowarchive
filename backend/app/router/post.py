@@ -6,7 +6,7 @@ from sqlmodel import func, select
 from sqlmodel.ext.asyncio.session import AsyncSession
 
 from app.dtos import PageResult
-from app.dtos.post import PostDetailsDTO
+from app.dtos.post import PostDetailsDTO, PostRepliesDTO
 from app.model import Posts, Replies, get_session
 
 post = APIRouter(prefix="/post")
@@ -40,8 +40,8 @@ async def get_post_by_id(
 @post.get("/{id}/replies")
 async def get_replies_by_post_id(
     id: int = Path(),
-    page_size=Query(default=30, le=50),
-    page_num=Query(default=1),
+    page_size: int = Query(default=30, lt=50),
+    page_num: int = Query(default=1),
     session: AsyncSession = Depends(get_session),
 ):
     stmt = (
@@ -59,10 +59,10 @@ async def get_replies_by_post_id(
     has_prev: bool = page_num > 1
     has_next: bool = page_num == total_page
     res = (await session.exec(stmt)).all()
-    return PageResult[Replies](
+    return PageResult[PostRepliesDTO](
         total_page=total_page,
         current_page=page_num,
         has_prev=has_prev,
         has_next=has_next,
-        item=res,
+        item=[PostRepliesDTO(reply=i, user=i.user, comments=i.comments) for i in res],
     )

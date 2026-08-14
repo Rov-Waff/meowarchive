@@ -5,6 +5,7 @@ const PostDetail = async ({ params }: { params: Promise<{ id: number }> }) => {
   const postData: Post = await (
     await fetch("http://localhost:8000/api/post/" + id)
   ).json();
+  const replyData;
   return (
     <>
       <h2>{postData.title}</h2>
@@ -16,6 +17,7 @@ const PostDetail = async ({ params }: { params: Promise<{ id: number }> }) => {
       </p>
       <hr />
       <div dangerouslySetInnerHTML={{ __html: postData.content }} />
+      <hr />
     </>
   );
 };

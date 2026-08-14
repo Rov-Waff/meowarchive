@@ -2,7 +2,7 @@ from datetime import datetime
 
 from pydantic import BaseModel
 
-from app.model import User
+from app.model import Comments, Replies, User
 
 
 class PostDetailsDTO(BaseModel):
@@ -21,3 +21,8 @@ class PostDetailsDTO(BaseModel):
     n_comments:int
     n_views:int
     tutorial_flag:int
+
+class PostRepliesDTO(BaseModel):
+    reply:Replies
+    user:User
+    comments:list[Comments]
