@@ -19,7 +19,7 @@ class User(SQLModel, table=True):
     praise_times: int
     view_times: int
     posts: list["Posts"] = Relationship(back_populates="user")
-
+    replies:list["Replies"]=Relationship(back_populates="user")
 
 class Board(SQLModel, table=True):
     id: int = Field(primary_key=True)
@@ -63,6 +63,7 @@ class Replies(SQLModel, table=True):
     post: Posts = Relationship(back_populates="replies")
     update_at: datetime
     user_id: int = Field(foreign_key="user.id")
+    user:User = Relationship(back_populates="replies")
     comments:list["Comments"] = Relationship(back_populates="reply")
 
 class Comments(SQLModel, table=True):
