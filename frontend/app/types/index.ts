@@ -74,7 +74,6 @@ interface PageResult<T> {
 }
 
 interface Reply {
-
   content: string
   created_at: Date
   is_top: boolean
@@ -85,5 +84,23 @@ interface Reply {
   n_comments: number
   post_id: number
   user_id: number
+}
 
+interface Comment {
+
+  is_liked: boolean
+  content: string
+  reply_id: number
+  user_id: number
+  id: number
+  created_at: Date
+  n_likes: number
+  reply_user_id: number
+  user:User
+}
+
+interface ReplyDTO {
+  reply: Reply
+  comments: Array<Comment>
+  user: User
 }

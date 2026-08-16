@@ -19,7 +19,12 @@ class User(SQLModel, table=True):
     praise_times: int
     view_times: int
     posts: list["Posts"] = Relationship(back_populates="user")
-    replies:list["Replies"]=Relationship(back_populates="user")
+    replies: list["Replies"] = Relationship(back_populates="user")
+    comments: list["Comments"] = Relationship(
+        back_populates="user",
+        sa_relationship_kwargs={"foreign_keys": "[Comments.user_id]"},
+    )
+
 
 class Board(SQLModel, table=True):
     id: int = Field(primary_key=True)
@@ -63,8 +68,9 @@ class Replies(SQLModel, table=True):
     post: Posts = Relationship(back_populates="replies")
     update_at: datetime
     user_id: int = Field(foreign_key="user.id")
-    user:User = Relationship(back_populates="replies")
-    comments:list["Comments"] = Relationship(back_populates="reply")
+    user: User = Relationship(back_populates="replies")
+    comments: list["Comments"] = Relationship(back_populates="reply")
+
 
 class Comments(SQLModel, table=True):
     id: int = Field(primary_key=True)
@@ -73,13 +79,18 @@ class Comments(SQLModel, table=True):
     is_liked: bool
     n_likes: int
     reply_id: int = Field(foreign_key="replies.id")
-    reply:Replies = Relationship(back_populates="comments")
+    reply: Replies = Relationship(back_populates="comments")
     reply_user_id: int | None = Field(foreign_key="user.id")
     user_id: int = Field(foreign_key="user.id")
+    user: User = Relationship(
+        back_populates="comments",
+        sa_relationship_kwargs={"foreign_keys": "[Comments.user_id]"},
+    )
 
-engine = create_async_engine(os.getenv("DB_URL",""))
+
+engine = create_async_engine(os.getenv("DB_URL", ""))
+
 
 async def get_session():
     async with AsyncSession(engine) as s:
         yield s
-    
