@@ -16,20 +16,11 @@ const BoardPosts = async ({ searchParams, params }: Props) => {
   ).json();
   return (
     <>
-      第 {pageData.current_page} 页，共 {pageData.total_page} 页
-      <br />
-      {pageData.current_page > 1 ? (
-        <Link href={`?page=${pageData.current_page - 1}`}>上一页</Link>
-      ) : (
-        <></>
-      )}
-      &nbsp;
-      {pageData.current_page < pageData.total_page ? (
-        <Link href={`?page=${pageData.current_page + 1}`}>下一页</Link>
-      ) : (
-        <></>
-      )}
-      <JumpComponent boardId={id} />
+      <JumpComponent
+        boardId={id}
+        current={pageData.current_page}
+        totalPage={pageData.total_page}
+      />
       <hr />
       {pageData.item.map((item) => {
         return (

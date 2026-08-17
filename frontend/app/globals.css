@@ -1,1 +1,277 @@
 @import "tailwindcss";
+
+/* ===== 基础排版 ===== */
+body {
+  font-family:
+    "PingFang SC",
+    "Hiragino Sans GB",
+    "Microsoft YaHei",
+    system-ui,
+    -apple-system,
+    sans-serif;
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 1.25rem 1rem 3rem;
+  background: #f6f7f9;
+  color: #24292f;
+  line-height: 1.65;
+}
+
+h1 {
+  font-size: 1.9rem;
+  font-weight: 800;
+  letter-spacing: 1px;
+  margin: 0 0 0.25rem;
+  background: linear-gradient(90deg, #2563eb, #7c3aed);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+h2 {
+  font-size: 1.4rem;
+  margin: 0.5rem 0;
+}
+
+h3 {
+  font-size: 1.1rem;
+  margin: 1rem 0 0.5rem;
+}
+
+hr {
+  border: none;
+  border-top: 1px solid #e5e7eb;
+  margin: 0.9rem 0;
+}
+
+/* ===== 链接 ===== */
+a {
+  color: #2563eb;
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+/* ===== 首页入口按钮 ===== */
+a[href="/board"] {
+  display: inline-block;
+  margin-top: 1.5rem;
+  padding: 0.55rem 1.4rem;
+  background: #2563eb;
+  color: #fff;
+  border-radius: 8px;
+  font-weight: 600;
+  box-shadow: 0 2px 6px rgba(37, 99, 235, 0.3);
+  transition:
+    background 0.15s ease,
+    transform 0.15s ease;
+}
+
+a[href="/board"]:hover {
+  background: #1d4ed8;
+  text-decoration: none;
+  transform: translateY(-1px);
+}
+
+/* ===== 卡片：板块列表 ===== */
+div:has(> a[href^="/board/"]) {
+  background: #fff;
+  border: 1px solid #e8eaee;
+  border-radius: 10px;
+  padding: 0.85rem 1.1rem;
+  margin: 0.8rem 0;
+  box-shadow: 0 1px 3px rgba(16, 24, 40, 0.06);
+  transition:
+    box-shadow 0.15s ease,
+    transform 0.15s ease;
+}
+
+div:has(> a[href^="/board/"]):hover {
+  box-shadow: 0 4px 12px rgba(16, 24, 40, 0.1);
+  transform: translateY(-1px);
+}
+
+div:has(> a[href^="/board/"]) > a {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+div:has(> a[href^="/board/"]) > p {
+  margin: 0.35rem 0 0;
+  font-size: 0.85rem;
+  color: #6b7280;
+}
+
+/* ===== 卡片：帖子列表 ===== */
+div:has(> a[href^="/post/"]) {
+  background: #fff;
+  border: 1px solid #e8eaee;
+  border-radius: 10px;
+  padding: 0.8rem 1.05rem;
+  margin: 0.75rem 0;
+  box-shadow: 0 1px 3px rgba(16, 24, 40, 0.06);
+  transition:
+    box-shadow 0.15s ease,
+    transform 0.15s ease;
+}
+
+div:has(> a[href^="/post/"]):hover {
+  box-shadow: 0 4px 12px rgba(16, 24, 40, 0.1);
+  transform: translateY(-1px);
+}
+
+div:has(> a[href^="/post/"]) > a {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+div:has(> a[href^="/post/"]) > p {
+  margin: 0.3rem 0 0;
+  font-size: 0.85rem;
+  color: #6b7280;
+}
+
+/* ===== 帖子正文（无 class 且直接子无链接的 body 子 div） ===== */
+body > div:not([class]):not(:has(> a)) {
+  background: #fff;
+  border: 1px solid #e8eaee;
+  border-radius: 10px;
+  padding: 1rem 1.2rem;
+  margin: 0.75rem 0;
+  line-height: 1.8;
+  overflow-wrap: break-word;
+}
+
+body > div:not([class]):not(:has(> a)) p {
+  margin: 0.5rem 0;
+}
+
+body > div:not([class]):not(:has(> a)) img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px;
+}
+
+/* ===== 帖子详情元信息 ===== */
+h2 + p {
+  color: #6b7280;
+  font-size: 0.9rem;
+}
+
+/* ===== 回复卡片（复用已有 border p-1 m-1 类） ===== */
+.border.p-1.m-1 {
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 1px 3px rgba(16, 24, 40, 0.06);
+}
+
+.border.p-1.m-1 > div {
+  background: #f9fafb;
+  border-radius: 8px;
+  padding: 0.6rem 0.8rem;
+  margin-top: 0.5rem;
+}
+
+.border.p-1.m-1 > div > div {
+  padding: 0.4rem 0;
+  border-bottom: 1px dashed #e5e7eb;
+}
+
+.border.p-1.m-1 > div > div:last-child {
+  border-bottom: none;
+}
+
+/* ===== 输入框 / 按钮 ===== */
+input {
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  padding: 0.3rem 0.6rem;
+  font-size: 0.9rem;
+  background: #fff;
+}
+
+input:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+button {
+  background: #2563eb;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 0.35rem 0.9rem;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+button:hover {
+  background: #1d4ed8;
+}
+
+/* ===== 分页跳转条 ===== */
+.pagination {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  background: #fff;
+  border: 1px solid #e8eaee;
+  border-radius: 10px;
+  padding: 0.55rem 0.9rem;
+  margin: 0.75rem 0;
+  box-shadow: 0 1px 3px rgba(16, 24, 40, 0.06);
+}
+
+.pagination-btn {
+  padding: 0.3rem 0.8rem;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  background: #fff;
+  color: #374151;
+  font-size: 0.9rem;
+  transition: all 0.15s ease;
+}
+
+.pagination-btn:hover {
+  border-color: #2563eb;
+  background: #eff6ff;
+  color: #2563eb;
+  text-decoration: none;
+}
+
+.pagination-btn.disabled {
+  background: #f9fafb;
+  color: #9ca3af;
+  cursor: not-allowed;
+}
+
+.pagination-btn.disabled:hover {
+  border-color: #d1d5db;
+  background: #f9fafb;
+  color: #9ca3af;
+}
+
+.pagination-info {
+  color: #6b7280;
+  font-size: 0.9rem;
+  white-space: nowrap;
+}
+
+.pagination input {
+  width: 4rem;
+  text-align: center;
+}
+
+.pagination-jump {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-left: auto;
+}
