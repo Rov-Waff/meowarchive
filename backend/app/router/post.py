@@ -68,7 +68,9 @@ async def get_replies_by_post_id(
             PostRepliesDTO(
                 reply=i,
                 user=i.user,
-                comments=[CommentDTO(**c.model_dump(), user=c.user) for c in i.comments],
+                comments=[
+                    CommentDTO(**c.model_dump(), user=c.user) for c in i.comments
+                ],
             )
             for i in res
         ],

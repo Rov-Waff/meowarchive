@@ -1,7 +1,9 @@
 import os
 import unittest
 
-os.environ.setdefault("DB_URL", "postgresql+asyncpg://user:pass@localhost:5432/meowarchive")
+os.environ.setdefault(
+    "DB_URL", "postgresql+asyncpg://user:pass@localhost:5432/meowarchive"
+)
 
 from app.model import Comments, Replies, User
 from app.dtos.post import CommentDTO, PostRepliesDTO
