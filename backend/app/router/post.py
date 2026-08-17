@@ -2,10 +2,11 @@ import math
 
 from fastapi import APIRouter, Depends, Path, Query
 from sqlalchemy.orm import selectinload
-from sqlmodel import func, select
+from sqlmodel import asc, func, select
 from sqlmodel.ext.asyncio.session import AsyncSession
 
 from app.dtos import PageResult
+from app.dtos.board import BoardPostPageDTO
 from app.dtos.post import CommentDTO, PostDetailsDTO, PostRepliesDTO
 from app.model import Comments, Posts, Replies, get_session
 
@@ -14,9 +15,15 @@ post = APIRouter(prefix="/post")
 
 @post.get("/{id}")
 async def get_post_by_id(
-    id: int = Path(), session: AsyncSession = Depends(get_session)
+    id: int = Path(),
+    session: AsyncSession = Depends(get_session),  # noqa: B008
 ):
-    stmt = select(Posts).where(Posts.id == id).options(selectinload(Posts.user))  # ty: ignore[invalid-argument-type]
+    stmt = (
+        select(Posts)
+        .where(Posts.id == id)
+        .options(selectinload(Posts.user))  # ty: ignore[invalid-argument-type]
+        .order_by(asc(Posts.id))
+    )
     res = (await session.exec(stmt)).one()
     return PostDetailsDTO(
         ask_help_flag=res.ask_help_flag,
@@ -42,7 +49,7 @@ async def get_replies_by_post_id(
     id: int = Path(),
     page_size: int = Query(default=30, lt=50),
     page_num: int = Query(default=1),
-    session: AsyncSession = Depends(get_session),
+    session: AsyncSession = Depends(get_session),  # noqa: B008
 ):
     stmt = (
         select(Replies)
@@ -51,6 +58,7 @@ async def get_replies_by_post_id(
         .offset((page_num - 1) * page_size)
         .options(selectinload(Replies.user))  # ty: ignore[invalid-argument-type]
         .options(selectinload(Replies.comments).selectinload(Comments.user))  # ty: ignore[invalid-argument-type]
+        .order_by(asc(Replies.id))
     )
     total_stmt = select(func.count()).select_from(Replies).where(Replies.post_id == id)
 
@@ -73,5 +81,50 @@ async def get_replies_by_post_id(
                 ],
             )
             for i in res
+        ],
+    )
+
+
+@post.get("/")
+async def get_all_paged_posts(
+    page_size: int = Query(default=30, lt=50),
+    page_num: int = Query(default=1),
+    session: AsyncSession = Depends(get_session),  # noqa: B008
+):
+    total_stmt = select(func.count()).select_from(Posts)
+    total = (await session.exec(total_stmt)).one()
+    total_page = math.ceil(total / page_size)
+    stmt = (
+        select(Posts)
+        .limit(page_size)
+        .offset((page_num - 1) * page_size)
+        .order_by(asc(Posts.id))
+        .options(selectinload(Posts.user))  # ty: ignore[invalid-argument-type]
+    )
+    data = (await session.exec(stmt)).all()
+    return PageResult[BoardPostPageDTO](
+        total_page=total_page,
+        current_page=page_num,
+        has_prev=page_num > 1,
+        has_next=page_num < total_page,
+        item=[
+            BoardPostPageDTO(
+                id=item.id,
+                ask_help_flag=item.ask_help_flag,
+                board_id=item.board_id,
+                board_name=item.board_name,
+                created_at=item.created_at,
+                is_authorized=item.is_authorized,
+                is_featured=item.is_featured,
+                is_pinned=item.is_pinned,
+                n_comments=item.n_comments,
+                n_replies=item.n_replies,
+                n_views=item.n_views,
+                title=item.title,
+                tutorial_flag=item.tutorial_flag,
+                user_id=item.user_id,
+                user=item.user,
+            )
+            for item in data
         ],
     )

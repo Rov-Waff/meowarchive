@@ -2,7 +2,7 @@ from datetime import datetime
 
 from pydantic import BaseModel
 
-from app.model import Comments, Replies, User
+from app.model import Replies, User
 
 
 class PostDetailsDTO(BaseModel):
