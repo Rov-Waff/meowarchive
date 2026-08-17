@@ -16,7 +16,7 @@ post = APIRouter(prefix="/post")
 @post.get("/{id}")
 async def get_post_by_id(
     id: int = Path(),
-    session: AsyncSession = Depends(get_session),  # noqa: B008
+    session: AsyncSession = Depends(get_session),
 ):
     stmt = (
         select(Posts)
@@ -49,7 +49,7 @@ async def get_replies_by_post_id(
     id: int = Path(),
     page_size: int = Query(default=30, lt=50),
     page_num: int = Query(default=1),
-    session: AsyncSession = Depends(get_session),  # noqa: B008
+    session: AsyncSession = Depends(get_session),
 ):
     stmt = (
         select(Replies)
@@ -89,7 +89,7 @@ async def get_replies_by_post_id(
 async def get_all_paged_posts(
     page_size: int = Query(default=30, lt=50),
     page_num: int = Query(default=1),
-    session: AsyncSession = Depends(get_session),  # noqa: B008
+    session: AsyncSession = Depends(get_session),
 ):
     total_stmt = select(func.count()).select_from(Posts)
     total = (await session.exec(total_stmt)).one()
