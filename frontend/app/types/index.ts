@@ -38,6 +38,7 @@ interface Board {
 interface User {
   id: number;
   nickname: string;
+  avatar: string;
   sex: number;
   doing: string;
   level: number;
@@ -74,33 +75,45 @@ interface PageResult<T> {
 }
 
 interface Reply {
-  content: string
-  created_at: Date
-  is_top: boolean
-  n_likes: number
-  update_at: Date
-  id: number
-  is_liked: boolean
-  n_comments: number
-  post_id: number
-  user_id: number
+  content: string;
+  created_at: Date;
+  is_top: boolean;
+  n_likes: number;
+  update_at: Date;
+  id: number;
+  is_liked: boolean;
+  n_comments: number;
+  post_id: number;
+  user_id: number;
 }
 
 interface Comment {
-
-  is_liked: boolean
-  content: string
-  reply_id: number
-  user_id: number
-  id: number
-  created_at: Date
-  n_likes: number
-  reply_user_id: number
-  user:User
+  is_liked: boolean;
+  content: string;
+  reply_id: number;
+  user_id: number;
+  id: number;
+  created_at: Date;
+  n_likes: number;
+  reply_user_id: number;
+  user: User;
 }
 
 interface ReplyDTO {
-  reply: Reply
-  comments: Array<Comment>
-  user: User
+  reply: Reply;
+  comments: Array<Comment>;
+  user: User;
+}
+
+interface UserReplyDTO {
+  reply: Reply;
+  post: Post;
+  user: User;
+}
+
+interface UserCommentDTO {
+  comment: Comment;
+  reply: Reply;
+  post: Post;
+  user: User;
 }

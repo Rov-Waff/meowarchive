@@ -6,7 +6,8 @@ os.environ.setdefault(
 )
 
 from app.dtos.post import CommentDTO, PostRepliesDTO
-from app.model import Comments, Replies, User
+from app.model import Comments, Replies, User, get_session
+from app.router.user import user
 
 
 class PostCommentsUserFieldTest(unittest.TestCase):
@@ -57,6 +58,19 @@ class PostCommentsUserFieldTest(unittest.TestCase):
 
         self.assertIn("user", payload.model_dump()["comments"][0])
         self.assertEqual(payload.model_dump()["comments"][0]["user"]["id"], 1)
+
+
+class UserRouterDependencyTest(unittest.TestCase):
+    def test_get_all_paged_user_uses_callable_dependency(self):
+        route = next(
+            route
+            for route in user.routes
+            if route.path == "/user/" and "GET" in route.methods
+        )
+        dependency = route.dependant.dependencies[0]
+
+        self.assertTrue(callable(dependency.call))
+        self.assertIs(dependency.call, get_session)
 
 
 if __name__ == "__main__":

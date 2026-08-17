@@ -87,7 +87,7 @@ No CI/CD configuration exists in the repository.
 
 ## Tips for AI Agents
 
-- **Hardcoded backend URL**: frontend pages fetch `http://localhost:8000/api/...` inline. Keep this in sync; if you add a page, copy the existing fetch pattern.
+- **Backend API base URL**: pages fetch via the shared constant `API_BASE` in `frontend/lib/api.ts`, which reads `NEXT_PUBLIC_BASE_URL` (default `http://localhost:8000/api`, override in `frontend/.env.local`; see `.env.example`). Keep `@/lib/api` imported in every page that fetches; add a page by copying the existing fetch pattern.
 - **Server-side fetch caching**: server components use bare `fetch`, so `next build` may statically render pages with stale data. If data freshness matters, add `export const dynamic = "force-dynamic"` or `cache: "no-store"`.
 - **Next 16 breaking changes**: `params`/`searchParams` are Promises (must be `await`ed), `LayoutProps`/global types come from `next-env.d.ts`. Read `frontend/AGENTS.md` and the bundled docs before writing frontend code.
 - **`next build` needs a live backend**: the build executes page fetches; run the backend (and a reachable DB) before `npm run build`.

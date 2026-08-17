@@ -1,8 +1,9 @@
 import Link from "next/link";
+import { API_BASE } from "@/lib/api";
 
 const Board = async () => {
   let boards: Array<Board> = await (
-    await fetch("http://localhost:8000/api/board/all")
+    await fetch(`${API_BASE}/board/all`)
   ).json();
   return (
     <>

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import RepliesPostComponent from "../RepliesPostComponent";
+import { API_BASE } from "@/lib/api";
 
 const PostDetail = async ({
   params,
@@ -10,27 +11,28 @@ const PostDetail = async ({
 }) => {
   const { id } = await params;
   const { page } = await searchParams;
-  const postData: Post = await (
-    await fetch("http://localhost:8000/api/post/" + id)
-  ).json();
+  const postData: Post = await (await fetch(`${API_BASE}/post/` + id)).json();
   const replyData: PageResult<ReplyDTO> = await (
-    await fetch(
-      `http://localhost:8000/api/post/${id}/replies?page_size=30&page_num=1`,
-    )
+    await fetch(`${API_BASE}/post/${id}/replies?page_size=30&page_num=1`)
   ).json();
   return (
     <>
       <h2 className="text-[1.4rem] my-2">{postData.title}</h2>
-      <p className="text-sm text-gray-500">
+      <p className="text-sm text-gray-500 flex items-center flex-wrap gap-x-1.5">
         用户:
+        <img
+          src={postData.user.avatar}
+          alt={postData.user.nickname}
+          className="w-5 h-5 rounded-full object-cover bg-gray-100"
+        />
         <Link
           href={`/user/${postData.user.id}`}
           className="text-blue-600 hover:underline"
         >
           {postData.user.nickname}
-        </Link>{" "}
+        </Link>
         查看:{postData.n_views} 回复:{postData.n_replies} 评论:
-        {postData.n_comments} 创建时间:{postData.created_at.toString()}{" "}
+        {postData.n_comments} 创建时间:{postData.created_at.toString()}
       </p>
       <hr className="border-0 border-t border-gray-200 my-3.5" />
       <div
@@ -50,12 +52,19 @@ const PostDetail = async ({
             className="border p-1 m-1 border-gray-300 bg-white rounded-[10px] shadow-sm"
             key={item.reply.id}
           >
-            <Link
-              href={`/user/${item.user.id}`}
-              className="text-blue-600 hover:underline"
-            >
-              {item.user.nickname}
-            </Link>
+            <span className="flex items-center gap-1.5">
+              <img
+                src={item.user.avatar}
+                alt={item.user.nickname}
+                className="w-6 h-6 rounded-full object-cover bg-gray-100"
+              />
+              <Link
+                href={`/user/${item.user.id}`}
+                className="text-blue-600 hover:underline"
+              >
+                {item.user.nickname}
+              </Link>
+            </span>
             <p dangerouslySetInnerHTML={{ __html: item.reply.content }}></p>
             <p>
               {item.reply.is_liked ? <>置顶</> : <></>} 点赞
@@ -71,12 +80,19 @@ const PostDetail = async ({
                     key={c.id}
                     className="py-1 border-b border-dashed border-gray-200 last:border-b-0"
                   >
-                    <Link
-                      href={`/user/${c.user_id}`}
-                      className="text-blue-600 hover:underline"
-                    >
-                      {c.user.nickname}
-                    </Link>
+                    <span className="flex items-center gap-1.5">
+                      <img
+                        src={c.user.avatar}
+                        alt={c.user.nickname}
+                        className="w-5 h-5 rounded-full object-cover bg-gray-100"
+                      />
+                      <Link
+                        href={`/user/${c.user_id}`}
+                        className="text-blue-600 hover:underline"
+                      >
+                        {c.user.nickname}
+                      </Link>
+                    </span>
                     <p dangerouslySetInnerHTML={{ __html: c.content }}></p>
                   </div>
                 );

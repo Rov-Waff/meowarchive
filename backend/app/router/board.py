@@ -2,20 +2,47 @@ import math
 
 from fastapi import APIRouter, Depends, Path, Query
 from sqlalchemy.orm import selectinload
-from sqlmodel import func, select
+from sqlmodel import asc, func, select
 from sqlmodel.ext.asyncio.session import AsyncSession
 
 from app.dtos import PageResult
-from app.dtos.board import BoardPostPageDTO
-from app.model import Board, Posts, get_session
+from app.dtos.board import BoardPostPageDTO, BoardWithStatsDTO
+from app.model import Board, Posts, Replies, get_session
 
 board: APIRouter = APIRouter(prefix="/board", dependencies=[Depends(get_session)])
 
 
 @board.get("/all")
 async def get_all_board(sess: AsyncSession = Depends(get_session)):
-    stmt = select(Board)
-    return (await sess.exec(stmt)).all()
+    # 帖子量：该板块的帖子数（SQL 实时统计，而非 board 表冗余字段）
+    posts_count = (
+        select(func.count())
+        .select_from(Posts)
+        .where(Posts.board_id == Board.id)
+        .correlate(Board)
+        .scalar_subquery()
+    )
+    # 讨论量：该板块所有帖子的回复总数
+    replies_count = (
+        select(func.count())
+        .select_from(Replies)
+        .join(Posts, Replies.post_id == Posts.id)
+        .where(Posts.board_id == Board.id)
+        .correlate(Board)
+        .scalar_subquery()
+    )
+    stmt = select(Board, posts_count, replies_count).order_by(asc(Board.id))
+    rows = (await sess.exec(stmt)).all()
+    return [
+        BoardWithStatsDTO(
+            id=item.id,
+            name=item.name,
+            is_hot=item.is_hot,
+            n_posts=posts,
+            n_discussions=replies,
+        )
+        for item, posts, replies in rows
+    ]
 
 
 # TODO: 获取单个板块的信息

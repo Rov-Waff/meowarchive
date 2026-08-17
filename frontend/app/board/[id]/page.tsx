@@ -1,5 +1,6 @@
 import Link from "next/link";
 import JumpComponent from "../components/JumpComponent";
+import { API_BASE } from "@/lib/api";
 
 interface Props {
   searchParams: Promise<{ page?: string }>;
@@ -10,9 +11,7 @@ const BoardPosts = async ({ searchParams, params }: Props) => {
   const { page = "1" } = await searchParams;
   const { id } = await params;
   let pageData: PageResult<Post> = await (
-    await fetch(
-      `http://localhost:8000/api/board/${id}/page?page_size=30&page_num=${page}`,
-    )
+    await fetch(`${API_BASE}/board/${id}/page?page_size=30&page_num=${page}`)
   ).json();
   return (
     <>

@@ -18,5 +18,5 @@ dev = [
     "ty>=0.0.71",
 ]
 
-[tool.ruff.lint]
-ignore = ["B008"]
+# [tool.ruff.lint]
+# ignore = ["B008"]

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import PagePostComponent from "./PagePostComponent";
+import { API_BASE } from "@/lib/api";
 
 export default async ({
   searchParams,
@@ -11,7 +12,7 @@ export default async ({
     page = 1;
   }
   let pageData: PageResult<Post> = await (
-    await fetch(`http://localhost:8000/api/post/?page_size=30&page_num=${page}`)
+    await fetch(`${API_BASE}/post/?page_size=30&page_num=${page}`)
   ).json();
   return (
     <>
