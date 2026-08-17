@@ -1,0 +1,10 @@
+.venv
+__pycache__
+*.pyc
+.env
+tests
+init.sql
+api
+vercel.json
+requirements.txt
+README.md

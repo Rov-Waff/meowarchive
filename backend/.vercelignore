@@ -1,0 +1,8 @@
+# Vercel 部署排除项（Root Directory: backend/）
+.venv
+__pycache__
+*.pyc
+tests
+.env
+init.sql
+README.md

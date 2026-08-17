@@ -20,3 +20,5 @@ dev = [
 
 # [tool.ruff.lint]
 # ignore = ["B008"]
+[tool.vercel]
+entrypoint = "app:app"
