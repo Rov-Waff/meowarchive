@@ -6,8 +6,8 @@ from sqlmodel import func, select
 from sqlmodel.ext.asyncio.session import AsyncSession
 
 from app.dtos import PageResult
-from app.dtos.post import PostDetailsDTO, PostRepliesDTO
-from app.model import Posts, Replies, get_session
+from app.dtos.post import CommentDTO, PostDetailsDTO, PostRepliesDTO
+from app.model import Comments, Posts, Replies, get_session
 
 post = APIRouter(prefix="/post")
 
@@ -50,7 +50,7 @@ async def get_replies_by_post_id(
         .limit(page_size)
         .offset((page_num - 1) * page_size)
         .options(selectinload(Replies.user))  # ty: ignore[invalid-argument-type]
-        .options(selectinload(Replies.comments))  # ty: ignore[invalid-argument-type]
+        .options(selectinload(Replies.comments).selectinload(Comments.user))  # ty: ignore[invalid-argument-type]
     )
     total_stmt = select(func.count()).select_from(Replies).where(Replies.post_id == id)
 
@@ -64,5 +64,12 @@ async def get_replies_by_post_id(
         current_page=page_num,
         has_prev=has_prev,
         has_next=has_next,
-        item=[PostRepliesDTO(reply=i, user=i.user, comments=i.comments) for i in res],
+        item=[
+            PostRepliesDTO(
+                reply=i,
+                user=i.user,
+                comments=[CommentDTO(**c.model_dump(), user=c.user) for c in i.comments],
+            )
+            for i in res
+        ],
     )

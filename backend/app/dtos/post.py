@@ -22,7 +22,20 @@ class PostDetailsDTO(BaseModel):
     n_views:int
     tutorial_flag:int
 
+
+class CommentDTO(BaseModel):
+    id:int
+    content:str
+    created_at:datetime
+    is_liked:bool
+    n_likes:int
+    reply_id:int
+    reply_user_id:int | None
+    user_id:int
+    user:User
+
+
 class PostRepliesDTO(BaseModel):
     reply:Replies
     user:User
-    comments:list[Comments]
+    comments:list[CommentDTO]
