@@ -5,25 +5,24 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 export default ({
-  boardId,
   current,
+
   totalPage,
 }: {
-  boardId: number;
   current: number;
   totalPage: number;
 }) => {
-  const [target, setTarget] = useState(String(current));
+  const [targetPage, setTarget] = useState(String(current));
   const router = useRouter();
 
-  const handleJump = () => {
-    const page = Number.parseInt(target, 10);
+  const jumpPage = () => {
+    const page = Number.parseInt(targetPage, 10);
 
     if (Number.isNaN(page) || page < 1 || page > totalPage) {
       return;
     }
 
-    router.push(`/board/${boardId}?page=${page}`);
+    router.push(`/post?page=${page}`);
   };
 
   return (
@@ -31,7 +30,7 @@ export default ({
       {current > 1 ? (
         <Link
           className="px-3 py-1 border border-gray-300 rounded-md bg-white text-gray-700 text-sm transition-all hover:border-blue-600 hover:bg-blue-50 hover:text-blue-600"
-          href={`?page=${current - 1}`}
+          href={`/post?page=${current - 1}`}
         >
           上一页
         </Link>
@@ -46,7 +45,7 @@ export default ({
       {current < totalPage ? (
         <Link
           className="px-3 py-1 border border-gray-300 rounded-md bg-white text-gray-700 text-sm transition-all hover:border-blue-600 hover:bg-blue-50 hover:text-blue-600"
-          href={`?page=${current + 1}`}
+          href={`/post?page=${current + 1}`}
         >
           下一页
         </Link>
@@ -57,13 +56,12 @@ export default ({
       )}
       <span className="inline-flex items-center gap-1.5 ml-auto">
         <input
-          value={target}
-          onChange={(e) => setTarget(e.target.value)}
-          type="text"
+          value={targetPage}
+          onChange={(p) => setTarget(p.target.value)}
           className="w-16 text-center border border-gray-300 rounded-md px-2.5 py-1 text-sm bg-white focus:outline-none focus:border-blue-600 focus:ring-3 focus:ring-blue-600/15"
         />
         <button
-          onClick={handleJump}
+          onClick={jumpPage}
           className="bg-blue-600 text-white rounded-md px-3.5 py-1 text-sm cursor-pointer transition hover:bg-blue-700"
         >
           跳转

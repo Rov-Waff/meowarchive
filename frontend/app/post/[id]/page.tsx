@@ -20,19 +20,25 @@ const PostDetail = async ({
   ).json();
   return (
     <>
-      <h2>{postData.title}</h2>
-      <p>
+      <h2 className="text-[1.4rem] my-2">{postData.title}</h2>
+      <p className="text-sm text-gray-500">
         用户:
-        <Link href={`/user/${postData.user.id}`}>
+        <Link
+          href={`/user/${postData.user.id}`}
+          className="text-blue-600 hover:underline"
+        >
           {postData.user.nickname}
         </Link>{" "}
         查看:{postData.n_views} 回复:{postData.n_replies} 评论:
         {postData.n_comments} 创建时间:{postData.created_at.toString()}{" "}
       </p>
-      <hr />
-      <div dangerouslySetInnerHTML={{ __html: postData.content }} />
-      <hr />
-      <h3>评论</h3>
+      <hr className="border-0 border-t border-gray-200 my-3.5" />
+      <div
+        className="bg-white border border-gray-200 rounded-[10px] px-5 py-4 my-3 leading-7 break-words [&_p]:my-2 [&_img]:rounded-lg"
+        dangerouslySetInnerHTML={{ __html: postData.content }}
+      />
+      <hr className="border-0 border-t border-gray-200 my-3.5" />
+      <h3 className="text-lg mt-4 mb-2">回复</h3>
       <RepliesPostComponent
         current={replyData.current_page}
         totalPage={replyData.total_page}
@@ -40,26 +46,42 @@ const PostDetail = async ({
       />
       {replyData.item.map((item) => {
         return (
-          <div className="border p-1 m-1" key={item.reply.id}>
-            <Link href={`/user/${item.user.id}`}>{item.user.nickname}</Link>
+          <div
+            className="border p-1 m-1 border-gray-300 bg-white rounded-[10px] shadow-sm"
+            key={item.reply.id}
+          >
+            <Link
+              href={`/user/${item.user.id}`}
+              className="text-blue-600 hover:underline"
+            >
+              {item.user.nickname}
+            </Link>
             <p dangerouslySetInnerHTML={{ __html: item.reply.content }}></p>
             <p>
               {item.reply.is_liked ? <>置顶</> : <></>} 点赞
               {item.reply.n_likes}{" "}
             </p>
-            <hr />
-            <div>
+            <hr className="border-0 border-t border-gray-200 my-3.5" />
+            <div className="bg-gray-50 rounded-lg px-3 py-2 mt-2">
               <p>评论</p>
 
               {item.comments.map((c) => {
                 return (
-                  <div key={c.id}>
-                    <Link href={`/user/${c.user_id}`}>{c.user.nickname}</Link>
+                  <div
+                    key={c.id}
+                    className="py-1 border-b border-dashed border-gray-200 last:border-b-0"
+                  >
+                    <Link
+                      href={`/user/${c.user_id}`}
+                      className="text-blue-600 hover:underline"
+                    >
+                      {c.user.nickname}
+                    </Link>
                     <p dangerouslySetInnerHTML={{ __html: c.content }}></p>
                   </div>
                 );
               })}
-              <hr />
+              <hr className="border-0 border-t border-gray-200 my-3.5" />
             </div>
           </div>
         );
