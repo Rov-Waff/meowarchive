@@ -21,6 +21,6 @@ ENV PATH="/app/.venv/bin:$PATH"
 
 COPY --from=builder /app/.venv /app/.venv
 COPY --from=builder /app/app /app/app
-
+RUN pip install gunicorn -i https://mirrors.tuna.tsinghua.edu.cn/pypi/web/simple
 EXPOSE 8000
-CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD "gunicorn --workers=4 --bind=0.0.0.0:8000 app:app"
