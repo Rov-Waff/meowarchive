@@ -16,6 +16,9 @@ COPY . .
 ARG NEXT_PUBLIC_BASE_URL
 ENV NEXT_PUBLIC_BASE_URL=$NEXT_PUBLIC_BASE_URL
 
+# 启用 standalone 输出（Docker 自托管需要；Vercel 云构建不设此变量）
+ENV NEXT_OUTPUT_STANDALONE=true
+
 RUN npm run build
 
 # ---------- 运行 ----------

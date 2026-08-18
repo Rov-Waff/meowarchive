@@ -1,3 +1,5 @@
 **/.codewhale/*
 !**/.codewhale/constitution.json
 .deepseek/
+.vercel
+.env*
