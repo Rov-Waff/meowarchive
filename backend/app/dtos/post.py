@@ -47,3 +47,20 @@ class SearchDTO(BaseModel):
     n_replies:int
     n_view:int
     n_comments:int
+
+
+class CommentSearchDTO(BaseModel):
+    id: int
+    content: str
+    created_at: datetime
+    n_likes: int
+    user: User
+
+
+class ReplySearchDTO(BaseModel):
+    id: int
+    content: str
+    created_at: datetime
+    n_likes: int
+    n_comments: int
+    user: User

@@ -8,6 +8,35 @@ export default async function Home() {
         <p>站长:xiaole6324 xiaole602010@qq.com</p>
         <p>感谢编程追梦者为我提供了一点精神支持（雾）</p>
       </div>
+      <form
+        action="/search"
+        method="get"
+        className="border rounded-lg p-3 border-gray-300 shadow-md mt-6 flex items-center gap-2 flex-wrap"
+      >
+        <input
+          type="text"
+          name="keyword"
+          required
+          placeholder="输入关键词…"
+          className="flex-1 min-w-40 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-600 focus:ring-3 focus:ring-blue-600/15"
+        />
+        <select
+          name="scope"
+          defaultValue="post_title"
+          className="border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:border-blue-600"
+        >
+          <option value="post_title">帖子标题</option>
+          <option value="post_content">帖子正文</option>
+          <option value="comment">评论</option>
+          <option value="reply">回复</option>
+        </select>
+        <button
+          type="submit"
+          className="bg-blue-600 text-white px-5 py-2 rounded-lg font-semibold shadow-md shadow-blue-600/30 transition hover:bg-blue-700 hover:-translate-y-px"
+        >
+          搜索
+        </button>
+      </form>
       <Link
         href={"/board"}
         className="border inline-block mt-6 px-5 py-2 bg-blue-600 text-white font-semibold rounded-lg shadow-md shadow-blue-600/30 transition hover:bg-blue-700 hover:-translate-y-px"
