@@ -117,3 +117,29 @@ interface UserCommentDTO {
   post: Post;
   user: User;
 }
+
+interface PostSearchItem {
+  title: string;
+  id: number;
+  user: User;
+  n_replies: number;
+  n_view: number;
+  n_comments: number;
+}
+
+interface CommentSearchItem {
+  id: number;
+  content: string;
+  created_at: Date;
+  n_likes: number;
+  user: User;
+}
+
+interface ReplySearchItem {
+  id: number;
+  content: string;
+  created_at: Date;
+  n_likes: number;
+  n_comments: number;
+  user: User;
+}
