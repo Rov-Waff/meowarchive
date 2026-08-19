@@ -1,4 +1,4 @@
-version: '3.8'
+
 services:
   backend:
     image: xiaole6324/meowarchive-backend:1.0.2
@@ -7,7 +7,31 @@ services:
       - 8000:8000
     networks:
       - meowarchive-net
-
+    depends_on:
+      - pgsql
+    env_file:
+      - .env.bk
+  pgsql:
+    image: docker.1ms.run/library/postgres:18
+    container_name: pgsql
+    ports:
+      - 5432:5432
+    networks:
+      - meowarchive-net
+    env_file:
+      - .env.pg
+  nginx:
+    image: library/nginx:alpine
+    container_name: nginx
+    ports:
+      - 80:80
+      - 443:443
+    networks:
+      - meowarchive-net
+    volumes:
+      - /etc/nginx/conf.d:/home/xiaole233/Meowarchive/nginx:rw
+    depends_on:
+      - backend
 networks:
   meowarchive-net:
     driver: bridge
