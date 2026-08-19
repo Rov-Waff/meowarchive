@@ -7,6 +7,7 @@ export default async function Home() {
         <p>本站备份了毛毡2016-2024的所有可以被找到的的帖子，您可以进行检索</p>
         <p>站长:xiaole6324 xiaole602010@qq.com</p>
         <p>感谢编程追梦者为我提供了一点精神支持（雾）</p>
+        <p>v1.1.0:基于PostgreSQL，做了一个简单的搜索功能，不一定好用<br />目前接口速度慢到极致，我实在没什么好办法（（</p>
       </div>
       <form
         action="/search"
