@@ -1,3 +1,4 @@
+import sqlalchemy
 import math
 
 from fastapi import APIRouter, Depends, Path, Query
@@ -127,4 +128,70 @@ async def get_all_paged_posts(
             )
             for item in data
         ],
+    )
+
+
+@post.get("/search/content")
+async def search_content(
+    keyword: str = Query(),
+    page_size: int = Query(default=30),
+    page_num: int = Query(),
+    session: AsyncSession = Depends(get_session),
+):
+    stmt = select(Posts).where(
+        func.to_tsvector("zh_cn", Posts.content).op("@@")(
+            func.to_tsquery("zh_cn", keyword)
+        )
+    ).limit(page_size).offset((page_num-1)*page_size)
+    total_stmt = (
+        select(func.count())
+        .select_from(Posts)
+        .where(
+            func.to_tsvector("zh_cn", Posts.content).op("@@")(
+                func.to_tsquery("zh_cn", keyword)
+            )
+        )
+    )
+    total = (await session.exec(total_stmt)).one()
+    data = (await session.exec(stmt)).all()
+    total_page = math.ceil(total / page_size)
+    return PageResult[Posts](
+        total_page=total_page,
+        current_page=page_num,
+        has_prev=page_num > 1,
+        has_next=page_num < total_page,
+        item=data,
+    )
+
+
+@post.get("/search/title")
+async def search_title(
+    keyword: str = Query(),
+    page_size: int = Query(default=30),
+    page_num: int = Query(),
+    session: AsyncSession = Depends(get_session),
+):
+    stmt = select(Posts).where(
+        func.to_tsvector("zh_cn", Posts.title).op("@@")(
+            func.to_tsquery("zh_cn", keyword)
+        ).limit(page_size).offset((page_num-1)*page_size)
+    )
+    total_stmt = (
+        select(func.count())
+        .select_from(Posts)
+        .where(
+            func.to_tsvector("zh_cn", Posts.title).op("@@")(
+                func.to_tsquery("zh_cn", keyword)
+            )
+        )
+    )
+    total = (await session.exec(total_stmt)).one()
+    data = (await session.exec(stmt)).all()
+    total_page = math.ceil(total / page_size)
+    return PageResult[Posts](
+        total_page=total_page,
+        current_page=page_num,
+        has_prev=page_num > 1,
+        has_next=page_num < total_page,
+        item=data,
     )
