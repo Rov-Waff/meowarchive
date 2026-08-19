@@ -39,3 +39,11 @@ class PostRepliesDTO(BaseModel):
     reply: Replies
     user: User
     comments: list[CommentDTO]
+
+class SearchDTO(BaseModel):
+    title:str
+    id:int
+    user:User
+    n_replies:int
+    n_view:int
+    n_comments:int

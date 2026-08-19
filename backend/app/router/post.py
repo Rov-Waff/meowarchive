@@ -1,14 +1,13 @@
-import sqlalchemy
 import math
 
 from fastapi import APIRouter, Depends, Path, Query
-from sqlalchemy.orm import selectinload
+from sqlalchemy.orm import load_only, selectinload
 from sqlmodel import asc, func, select
 from sqlmodel.ext.asyncio.session import AsyncSession
 
 from app.dtos import PageResult
 from app.dtos.board import BoardPostPageDTO
-from app.dtos.post import CommentDTO, PostDetailsDTO, PostRepliesDTO
+from app.dtos.post import CommentDTO, PostDetailsDTO, PostRepliesDTO, SearchDTO
 from app.model import Comments, Posts, Replies, get_session
 
 post = APIRouter(prefix="/post")
@@ -138,11 +137,22 @@ async def search_content(
     page_num: int = Query(),
     session: AsyncSession = Depends(get_session),
 ):
-    stmt = select(Posts).where(
-        func.to_tsvector("zh_cn", Posts.content).op("@@")(
-            func.to_tsquery("zh_cn", keyword)
+    stmt = (
+        select(Posts)
+        .where(
+            func.to_tsvector("zh_cn", Posts.content).op("@@")(
+                func.to_tsquery("zh_cn", keyword)
+            )
         )
-    ).limit(page_size).offset((page_num-1)*page_size)
+        .options(
+            load_only(
+                Posts.title, Posts.n_comments, Posts.n_views, Posts.n_replies, Posts.id  # ty: ignore[invalid-argument-type]
+            ),
+            selectinload(Posts.user),  # ty: ignore[invalid-argument-type]
+        )
+        .limit(page_size)
+        .offset((page_num - 1) * page_size)
+    )
     total_stmt = (
         select(func.count())
         .select_from(Posts)
@@ -155,12 +165,22 @@ async def search_content(
     total = (await session.exec(total_stmt)).one()
     data = (await session.exec(stmt)).all()
     total_page = math.ceil(total / page_size)
-    return PageResult[Posts](
+    return PageResult[SearchDTO](
         total_page=total_page,
         current_page=page_num,
         has_prev=page_num > 1,
         has_next=page_num < total_page,
-        item=data,
+        item=[
+            SearchDTO(
+                id=i.id,
+                title=i.title,
+                user=i.user,
+                n_replies=i.n_replies,
+                n_view=i.n_views,
+                n_comments=i.n_comments,
+            )
+            for i in data
+        ],
     )
 
 
@@ -171,10 +191,21 @@ async def search_title(
     page_num: int = Query(),
     session: AsyncSession = Depends(get_session),
 ):
-    stmt = select(Posts).where(
-        func.to_tsvector("zh_cn", Posts.title).op("@@")(
-            func.to_tsquery("zh_cn", keyword)
-        ).limit(page_size).offset((page_num-1)*page_size)
+    stmt = (
+        select(Posts)
+        .where(
+            func.to_tsvector("zh_cn", Posts.title).op("@@")(
+                func.to_tsquery("zh_cn", keyword)
+            )
+        )
+        .options(
+            load_only(
+                Posts.title, Posts.n_comments, Posts.n_views, Posts.n_replies, Posts.id  # ty: ignore[invalid-argument-type]
+            ),
+            selectinload(Posts.user),  # ty: ignore[invalid-argument-type]
+        )
+        .limit(page_size)
+        .offset((page_num - 1) * page_size)
     )
     total_stmt = (
         select(func.count())
@@ -188,10 +219,20 @@ async def search_title(
     total = (await session.exec(total_stmt)).one()
     data = (await session.exec(stmt)).all()
     total_page = math.ceil(total / page_size)
-    return PageResult[Posts](
+    return PageResult[SearchDTO](
         total_page=total_page,
         current_page=page_num,
         has_prev=page_num > 1,
         has_next=page_num < total_page,
-        item=data,
+        item=[
+            SearchDTO(
+                id=i.id,
+                title=i.title,
+                user=i.user,
+                n_replies=i.n_replies,
+                n_view=i.n_views,
+                n_comments=i.n_comments,
+            )
+            for i in data
+        ],
     )
