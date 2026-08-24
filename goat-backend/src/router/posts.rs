@@ -46,6 +46,9 @@ async fn get_post_replies(
     let size = pagination.size;
     let page = pagination.page;
     let db = state.db.clone();
+    if size > 50 {
+        return Err((StatusCode::BAD_REQUEST, "Too Big size".to_string()));
+    }
     let data = entity::replies::Entity::find()
         .filter(entity::replies::Column::PostId.eq(*post_id as u64))
         .find_also_related(entity::user::Entity)
@@ -100,8 +103,40 @@ async fn get_post_replies(
     }))
 }
 
+#[axum::debug_handler]
+async fn get_all_posts(
+    state: State<Arc<AppState>>,
+    pagination: Query<Pagination>,
+) -> Result<Json<PageResult<entity::posts::Model>>, (StatusCode, String)> {
+    let db = state.db.clone();
+    let size = pagination.size;
+    let page = pagination.page;
+    if size > 50 {
+        return Err((StatusCode::BAD_REQUEST, "Too big size".to_string()));
+    } else {
+        let total = entity::posts::Entity::find()
+            .count(&db)
+            .await
+            .map_err(|err| (StatusCode::INTERNAL_SERVER_ERROR, err.to_string()))?
+            .div_ceil(size as u64);
+        let res = entity::posts::Entity::find()
+            .paginate(&db, size as u64)
+            .fetch_page((page - 1) as u64)
+            .await
+            .map_err(|err| (StatusCode::INTERNAL_SERVER_ERROR, err.to_string()))?;
+        return Ok(Json(PageResult {
+            current: page,
+            total: total as u32,
+            has_next: page > 1,
+            has_prev: page < total as u32,
+            item: res,
+        }));
+    }
+}
+
 pub fn posts_router() -> Router<Arc<AppState>> {
     Router::new()
+        .route("/", get(get_all_posts))
         .route("/{post_id}", get(get_post_detail_handler))
         .route("/{post_id}/replies", get(get_post_replies))
 }
