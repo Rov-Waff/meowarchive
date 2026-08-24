@@ -1,5 +1,7 @@
 use serde::{Deserialize, Serialize};
 
+use crate::entity;
+
 #[derive(Deserialize, Serialize)]
 pub struct Pagination {
     pub page: u32,
@@ -13,4 +15,10 @@ pub struct PageResult<T> {
     pub has_next: bool,
     pub has_prev: bool,
     pub item: Vec<T>,
+}
+
+#[derive(Deserialize, Serialize)]
+pub struct PostDetail {
+    pub post: entity::posts::Model,
+    pub user: entity::user::Model,
 }
