@@ -1,0 +1,16 @@
+use serde::{Deserialize, Serialize};
+
+#[derive(Deserialize, Serialize)]
+pub struct Pagination {
+    pub page: u32,
+    pub size: u32,
+}
+
+#[derive(Deserialize, Serialize)]
+pub struct PageResult<T> {
+    pub current: u32,
+    pub total: u32,
+    pub has_next: bool,
+    pub has_prev: bool,
+    pub item: Vec<T>,
+}

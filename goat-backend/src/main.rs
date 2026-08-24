@@ -19,6 +19,7 @@ impl FromRef<AppState> for DatabaseConnection {
 
 pub mod entity;
 pub mod router;
+pub mod dtos;
 
 #[tokio::main]
 async fn main() {
