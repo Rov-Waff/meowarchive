@@ -22,3 +22,10 @@ pub struct PostDetail {
     pub post: entity::posts::Model,
     pub user: entity::user::Model,
 }
+
+#[derive(Deserialize,Serialize)]
+pub struct PostCommentDTO {
+    pub reply: entity::replies::Model,
+    pub user: entity::user::Model,
+    pub comments: Vec<entity::comments::Model>,
+}
