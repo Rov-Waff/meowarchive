@@ -10,7 +10,7 @@ use sea_orm::{ColumnTrait, EntityTrait, PaginatorTrait, QueryFilter, QueryOrder}
 
 use crate::{
     AppState,
-    dtos::{Pagination, PostCommentDTO},
+    dtos::{PageResult, Pagination, PostCommentDTO},
     entity,
 };
 
@@ -42,7 +42,7 @@ async fn get_post_replies(
     post_id: Path<u32>,
     state: State<Arc<AppState>>,
     pagination: Query<Pagination>,
-) -> Result<Json<Vec<PostCommentDTO>>, (StatusCode, String)> {
+) -> Result<Json<PageResult<PostCommentDTO>>, (StatusCode, String)> {
     let size = pagination.size;
     let page = pagination.page;
     let db = state.db.clone();
@@ -54,32 +54,51 @@ async fn get_post_replies(
         .fetch_page((page - 1) as u64)
         .await
         .map_err(|err| (StatusCode::INTERNAL_SERVER_ERROR, err.to_string()))?;
+    let reply_ids: Vec<i64> = data.iter().map(|(reply, _)| reply.id).collect();
+    let total_page = entity::replies::Entity::find()
+        .filter(entity::replies::Column::PostId.eq(*post_id as u64))
+        .count(&db)
+        .await
+        .map_err(|err| (StatusCode::INTERNAL_SERVER_ERROR, err.to_string()))?
+        .div_ceil(size as u64);
+    let comments = if reply_ids.is_empty() {
+        vec![]
+    } else {
+        entity::comments::Entity::find()
+            .filter(entity::comments::Column::ReplyId.is_in(reply_ids))
+            .order_by_asc(entity::comments::Column::Id)
+            .all(&db)
+            .await
+            .map_err(|err| (StatusCode::INTERNAL_SERVER_ERROR, err.to_string()))?
+    };
+    let mut comments_by_reply: std::collections::HashMap<i64, Vec<entity::comments::Model>> =
+        std::collections::HashMap::new();
+    for comment in comments {
+        if let Some(reply_id) = comment.reply_id {
+            comments_by_reply.entry(reply_id).or_default().push(comment);
+        }
+    }
     let mut items = vec![];
-    for item in data {
-        //TODO: N+1了，日后处理
-        let (reply, user) = item;
+    for (reply, user) in data {
         let user = match user {
             Some(r) => r,
             None => return Err((StatusCode::NOT_FOUND, "Not found".to_string())),
         };
-        let comments = match entity::comments::Entity::find()
-            .filter(entity::comments::Column::ReplyId.eq(reply.id))
-            .all(&db)
-            .await
-        {
-            Ok(r) => r,
-            Err(e) => return Err((StatusCode::INTERNAL_SERVER_ERROR, e.to_string())),
-        };
+        let reply_id = reply.id;
         items.push(PostCommentDTO {
-            reply: reply,
-            user: user,
-            comments: comments,
+            reply,
+            user,
+            comments: comments_by_reply.remove(&reply_id).unwrap_or_default(),
         });
     }
-    Ok(Json(items))
+    Ok(Json(PageResult {
+        current: page,
+        total: total_page as u32,
+        has_next: page > 1,
+        has_prev: page < total_page as u32,
+        item: items,
+    }))
 }
-
-
 
 pub fn posts_router() -> Router<Arc<AppState>> {
     Router::new()
