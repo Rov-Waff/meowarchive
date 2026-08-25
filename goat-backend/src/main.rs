@@ -9,6 +9,8 @@ use tower_http::trace::TraceLayer;
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 
 use crate::router::router;
+use utoipa::OpenApi;
+use utoipa_swagger_ui::SwaggerUi;
 
 #[derive(Clone, Debug)]
 pub struct AppState {
@@ -20,6 +22,7 @@ impl FromRef<AppState> for DatabaseConnection {
     }
 }
 
+pub mod api_doc;
 pub mod dtos;
 pub mod entity;
 pub mod router;
@@ -37,6 +40,7 @@ async fn main() {
     let state = Arc::new(AppState { db: database });
     let app = Router::new()
         .merge(router())
+        .merge(SwaggerUi::new("/swagger-ui").url("/api-doc/openapi.json", api_doc::ApiDoc::openapi()))
         .layer(ServiceBuilder::new().layer(TraceLayer::new_for_http()))
         .with_state(state);
     let listener = TcpListener::bind(format!(

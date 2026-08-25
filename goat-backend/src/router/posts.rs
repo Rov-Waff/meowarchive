@@ -6,14 +6,30 @@ use axum::{
     http::StatusCode,
     routing::get,
 };
-use sea_orm::{ColumnTrait, EntityTrait, PaginatorTrait, QueryFilter, QueryOrder};
+use sea_orm::{
+    ColumnTrait, EntityTrait, PaginatorTrait, QueryFilter, QueryOrder,
+    sea_query::{BinOper, Condition, Expr, ExprTrait, Func},
+};
 
 use crate::{
     AppState,
-    dtos::{PageResult, Pagination, PostCommentDTO},
+    dtos::{
+        Pagination, PostCommentDTO, PostCommentPage, PostPage, PostSearchPage, SearchDTO,
+    },
     entity,
 };
 
+/// 获取帖子详情
+#[utoipa::path(
+    get,
+    path = "/post/{post_id}",
+    tag = "post",
+    params(("post_id" = u32, Path, description = "帖子 ID")),
+    responses(
+        (status = 200, description = "帖子详情", body = crate::dtos::PostDetail),
+        (status = 404, description = "未找到"),
+    )
+)]
 async fn get_post_detail_handler(
     post_id: Path<u32>,
     state: State<Arc<AppState>>,
@@ -38,11 +54,21 @@ async fn get_post_detail_handler(
     }
 }
 
+/// 分页获取帖子回复（含评论）
+#[utoipa::path(
+    get,
+    path = "/post/{post_id}/replies",
+    tag = "post",
+    params(("post_id" = u32, Path, description = "帖子 ID")),
+    responses(
+        (status = 200, description = "分页回复列表", body = PostCommentPage),
+    )
+)]
 async fn get_post_replies(
     post_id: Path<u32>,
     state: State<Arc<AppState>>,
     pagination: Query<Pagination>,
-) -> Result<Json<PageResult<PostCommentDTO>>, (StatusCode, String)> {
+) -> Result<Json<PostCommentPage>, (StatusCode, String)> {
     let size = pagination.size;
     let page = pagination.page;
     let db = state.db.clone();
@@ -94,7 +120,7 @@ async fn get_post_replies(
             comments: comments_by_reply.remove(&reply_id).unwrap_or_default(),
         });
     }
-    Ok(Json(PageResult {
+    Ok(Json(PostCommentPage {
         current: page,
         total: total_page as u32,
         has_next: page > 1,
@@ -103,11 +129,20 @@ async fn get_post_replies(
     }))
 }
 
+/// 分页获取全部帖子
+#[utoipa::path(
+    get,
+    path = "/post",
+    tag = "post",
+    responses(
+        (status = 200, description = "分页帖子列表", body = PostPage),
+    )
+)]
 #[axum::debug_handler]
 async fn get_all_posts(
     state: State<Arc<AppState>>,
     pagination: Query<Pagination>,
-) -> Result<Json<PageResult<entity::posts::Model>>, (StatusCode, String)> {
+) -> Result<Json<PostPage>, (StatusCode, String)> {
     let db = state.db.clone();
     let size = pagination.size;
     let page = pagination.page;
@@ -124,7 +159,7 @@ async fn get_all_posts(
             .fetch_page((page - 1) as u64)
             .await
             .map_err(|err| (StatusCode::INTERNAL_SERVER_ERROR, err.to_string()))?;
-        return Ok(Json(PageResult {
+        return Ok(Json(PostPage {
             current: page,
             total: total as u32,
             has_next: page > 1,
@@ -134,9 +169,111 @@ async fn get_all_posts(
     }
 }
 
+async fn search_posts_handler(
+    keyword: Query<String>,
+    pagination: Query<Pagination>,
+    state: State<Arc<AppState>>,
+    column: entity::posts::Column,
+) -> Result<Json<PostSearchPage>, (StatusCode, String)> {
+    let db = state.db.clone();
+    let size = pagination.size;
+    let page = pagination.page;
+    if size > 30 {
+        return Err((StatusCode::BAD_REQUEST, "Too Big".to_string()));
+    }
+    let tsvector = Expr::expr(
+        Func::cust("to_tsvector")
+            .arg(Expr::val("zh_cn"))
+            .arg(Expr::col(column)),
+    );
+    let tsquery = Expr::expr(
+        Func::cust("to_tsquery")
+            .arg(Expr::val("zh_cn"))
+            .arg(Expr::val(keyword.0)),
+    );
+    let cond = Condition::all().add(tsvector.binary(BinOper::Custom("@@"), tsquery));
+    let data = entity::posts::Entity::find()
+        .filter(cond.clone())
+        .find_also_related(entity::user::Entity)
+        .paginate(&db, size as u64)
+        .fetch_page((page - 1) as u64)
+        .await
+        .map_err(|err| (StatusCode::INTERNAL_SERVER_ERROR, err.to_string()))?;
+    let total_page = entity::posts::Entity::find()
+        .filter(cond)
+        .count(&db)
+        .await
+        .map_err(|err| (StatusCode::INTERNAL_SERVER_ERROR, err.to_string()))?
+        .div_ceil(size as u64);
+    let mut items = vec![];
+    for (post, user) in data {
+        let user = match user {
+            Some(u) => u,
+            None => return Err((StatusCode::NOT_FOUND, "Not Found".to_string())),
+        };
+        items.push(SearchDTO {
+            id: post.id,
+            title: post.title,
+            user,
+            n_replies: post.n_replies,
+            n_view: post.n_views,
+            n_comments: post.n_comments,
+        });
+    }
+    Ok(Json(PostSearchPage {
+        current: page,
+        total: total_page as u32,
+        has_next: page < total_page as u32,
+        has_prev: page > 1,
+        item: items,
+    }))
+}
+
+/// 按内容搜索帖子（全文检索）
+#[utoipa::path(
+    get,
+    path = "/post/search/content",
+    tag = "post",
+    params(
+        ("keyword" = String, Query, description = "搜索关键词"),
+    ),
+    responses(
+        (status = 200, description = "搜索结果", body = PostSearchPage),
+    )
+)]
+async fn search_posts_content_handler(
+    keyword: Query<String>,
+    pagination: Query<Pagination>,
+    state: State<Arc<AppState>>,
+) -> Result<Json<PostSearchPage>, (StatusCode, String)> {
+    search_posts_handler(keyword, pagination, state, entity::posts::Column::Content).await
+}
+
+/// 按标题搜索帖子（全文检索）
+#[utoipa::path(
+    get,
+    path = "/post/search/title",
+    tag = "post",
+    params(
+        ("keyword" = String, Query, description = "搜索关键词"),
+    ),
+    responses(
+        (status = 200, description = "搜索结果", body = PostSearchPage),
+    )
+)]
+async fn search_posts_title_handler(
+    keyword: Query<String>,
+    pagination: Query<Pagination>,
+    state: State<Arc<AppState>>,
+) -> Result<Json<PostSearchPage>, (StatusCode, String)> {
+    search_posts_handler(keyword, pagination, state, entity::posts::Column::Title).await
+}
+
 pub fn posts_router() -> Router<Arc<AppState>> {
     Router::new()
         .route("/", get(get_all_posts))
         .route("/{post_id}", get(get_post_detail_handler))
         .route("/{post_id}/replies", get(get_post_replies))
+        .route("/search/content", get(search_posts_content_handler))
+        .route("/search/title", get(search_posts_title_handler))
 }
