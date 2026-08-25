@@ -11,14 +11,14 @@ export default async ({
   if (page == undefined) {
     page = 1;
   }
-  let pageData: PageResult<Post> = await (
-    await fetch(`${API_BASE}/post/?page_size=30&page_num=${page}`)
+  const pageData: PageResult<Post> = await (
+    await fetch(`${API_BASE}/post?size=30&page=${page}`)
   ).json();
   return (
     <>
       <PagePostComponent
-        current={pageData.current_page}
-        totalPage={pageData.total_page}
+        current={pageData.current}
+        totalPage={pageData.total}
       />
       <div className="">
         {pageData.item.map((item) => {
@@ -31,11 +31,11 @@ export default async ({
                 href={`/post/${item.id}`}
                 className="font-semibold text-gray-800 hover:underline"
               >
-                {item.title}
+                {item.title ?? ""}
               </Link>
               <p className="mt-1 text-sm text-gray-500">
-                ID:{item.id} 阅读:{item.n_views} 评论:{item.n_comments} 回复:
-                {item.n_replies}
+                ID:{item.id} 阅读:{item.n_views ?? 0} 评论:{item.n_comments ?? 0}{" "}
+                回复:{item.n_replies ?? 0}
               </p>
               <p className="mt-1 text-sm text-gray-500">
                 {item.is_authorized ? <>官方</> : <></>}{" "}

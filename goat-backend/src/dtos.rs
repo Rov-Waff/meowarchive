@@ -8,6 +8,11 @@ pub struct Pagination {
 }
 
 #[derive(Deserialize, Serialize, utoipa::ToSchema)]
+pub struct SearchParams {
+    pub keyword: String,
+}
+
+#[derive(Deserialize, Serialize, utoipa::ToSchema)]
 pub struct PageResult<T> {
     pub current: u32,
     pub total: u32,

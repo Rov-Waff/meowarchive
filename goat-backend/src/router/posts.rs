@@ -8,13 +8,14 @@ use axum::{
 };
 use sea_orm::{
     ColumnTrait, EntityTrait, PaginatorTrait, QueryFilter, QueryOrder,
-    sea_query::{BinOper, Condition, Expr, ExprTrait, Func},
+    sea_query::{Alias, BinOper, Condition, Expr, ExprTrait, Func},
 };
 
 use crate::{
     AppState,
     dtos::{
         Pagination, PostCommentDTO, PostCommentPage, PostPage, PostSearchPage, SearchDTO,
+        SearchParams,
     },
     entity,
 };
@@ -123,8 +124,8 @@ async fn get_post_replies(
     Ok(Json(PostCommentPage {
         current: page,
         total: total_page as u32,
-        has_next: page > 1,
-        has_prev: page < total_page as u32,
+        has_next: page < total_page as u32,
+        has_prev: page > 1,
         item: items,
     }))
 }
@@ -162,15 +163,15 @@ async fn get_all_posts(
         return Ok(Json(PostPage {
             current: page,
             total: total as u32,
-            has_next: page > 1,
-            has_prev: page < total as u32,
+            has_next: page < total as u32,
+            has_prev: page > 1,
             item: res,
         }));
     }
 }
 
 async fn search_posts_handler(
-    keyword: Query<String>,
+    keyword: Query<SearchParams>,
     pagination: Query<Pagination>,
     state: State<Arc<AppState>>,
     column: entity::posts::Column,
@@ -183,13 +184,13 @@ async fn search_posts_handler(
     }
     let tsvector = Expr::expr(
         Func::cust("to_tsvector")
-            .arg(Expr::val("zh_cn"))
+            .arg(Expr::val("zh_cn").cast_as(Alias::new("regconfig")))
             .arg(Expr::col(column)),
     );
     let tsquery = Expr::expr(
         Func::cust("to_tsquery")
-            .arg(Expr::val("zh_cn"))
-            .arg(Expr::val(keyword.0)),
+            .arg(Expr::val("zh_cn").cast_as(Alias::new("regconfig")))
+            .arg(Expr::val(keyword.keyword.clone())),
     );
     let cond = Condition::all().add(tsvector.binary(BinOper::Custom("@@"), tsquery));
     let data = entity::posts::Entity::find()
@@ -242,7 +243,7 @@ async fn search_posts_handler(
     )
 )]
 async fn search_posts_content_handler(
-    keyword: Query<String>,
+    keyword: Query<SearchParams>,
     pagination: Query<Pagination>,
     state: State<Arc<AppState>>,
 ) -> Result<Json<PostSearchPage>, (StatusCode, String)> {
@@ -262,7 +263,7 @@ async fn search_posts_content_handler(
     )
 )]
 async fn search_posts_title_handler(
-    keyword: Query<String>,
+    keyword: Query<SearchParams>,
     pagination: Query<Pagination>,
     state: State<Arc<AppState>>,
 ) -> Result<Json<PostSearchPage>, (StatusCode, String)> {

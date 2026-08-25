@@ -21,17 +21,15 @@ const UserDetail = async ({
 
   if (activeTab === "posts") {
     postData = await (
-      await fetch(`${API_BASE}/user/${id}/posts?page_size=30&page_num=${page}`)
+      await fetch(`${API_BASE}/user/${id}/posts?size=30&page=${page}`)
     ).json();
   } else if (activeTab === "comments") {
     commentData = await (
-      await fetch(
-        `${API_BASE}/user/${id}/comments?page_size=30&page_num=${page}`,
-      )
+      await fetch(`${API_BASE}/user/${id}/comments?size=30&page=${page}`)
     ).json();
   } else {
     replyData = await (
-      await fetch(`${API_BASE}/user/${id}/reply?page_size=30&page_num=${page}`)
+      await fetch(`${API_BASE}/user/${id}/reply?size=30&page=${page}`)
     ).json();
   }
 
@@ -53,21 +51,25 @@ const UserDetail = async ({
       <div className="bg-white border border-gray-200 rounded-[10px] px-5 py-4 my-3 shadow-sm">
         <div className="flex items-center gap-4">
           <img
-            src={userData.avatar}
-            alt={userData.nickname}
+            src={userData.avatar ?? ""}
+            alt={userData.nickname ?? ""}
             className="w-20 h-20 rounded-full object-cover bg-gray-100"
           />
           <div className="min-w-0">
-            <h2 className="text-[1.4rem] font-semibold">{userData.nickname}</h2>
-            <p className="text-sm text-gray-500">Lv.{userData.level}</p>
-            <p className="text-sm text-gray-600 mt-1">{userData.description}</p>
+            <h2 className="text-[1.4rem] font-semibold">
+              {userData.nickname ?? ""}
+            </h2>
+            <p className="text-sm text-gray-500">Lv.{userData.level ?? 0}</p>
+            <p className="text-sm text-gray-600 mt-1">
+              {userData.description ?? ""}
+            </p>
           </div>
         </div>
         <div className="flex flex-wrap gap-x-6 gap-y-1 mt-4 text-sm text-gray-500">
-          <span>获赞:{userData.praise_times}</span>
-          <span>收藏:{userData.collection_times}</span>
-          <span>浏览:{userData.view_times}</span>
-          <span>作品收藏:{userData.forked_times}</span>
+          <span>获赞:{userData.praise_times ?? 0}</span>
+          <span>收藏:{userData.collection_times ?? 0}</span>
+          <span>浏览:{userData.view_times ?? 0}</span>
+          <span>作品收藏:{userData.forked_times ?? 0}</span>
         </div>
         {userData.doing ? (
           <p className="text-xs text-gray-400 mt-2">签名:{userData.doing}</p>
@@ -98,8 +100,8 @@ const UserDetail = async ({
       {activeData ? (
         <>
           <UserContentComponent
-            current={activeData.current_page}
-            totalPage={activeData.total_page}
+            current={activeData.current}
+            totalPage={activeData.total}
             base={`/user/${id}?tab=${activeTab}`}
           />
           {activeData.item.length === 0 ? (
@@ -123,11 +125,11 @@ const UserDetail = async ({
                 href={`/post/${item.id}`}
                 className="font-semibold text-gray-800 hover:underline"
               >
-                {item.title}
+                {item.title ?? ""}
               </Link>
               <p className="mt-1 text-sm text-gray-500">
-                ID:{item.id} 阅读:{item.n_views} 评论:{item.n_comments} 回复:
-                {item.n_replies}
+                ID:{item.id} 阅读:{item.n_views ?? 0} 评论:{item.n_comments ?? 0}{" "}
+                回复:{item.n_replies ?? 0}
               </p>
               <p className="mt-1 text-sm text-gray-500">
                 {item.is_authorized ? <>官方</> : <></>}{" "}
@@ -155,16 +157,16 @@ const UserDetail = async ({
                   href={`/post/${item.post.id}`}
                   className="text-blue-600 hover:underline"
                 >
-                  {item.post.title}
+                  {item.post.title ?? ""}
                 </Link>{" "}
                 下评论
               </p>
               <p
                 className="mt-1 break-words"
-                dangerouslySetInnerHTML={{ __html: item.comment.content }}
+                dangerouslySetInnerHTML={{ __html: item.comment.content ?? "" }}
               />
               <p className="text-xs text-gray-400 mt-1">
-                {item.comment.created_at.toString()}
+                {item.comment.created_at?.toString() ?? ""}
               </p>
             </div>
           );
@@ -186,16 +188,17 @@ const UserDetail = async ({
                   href={`/post/${item.post.id}`}
                   className="text-blue-600 hover:underline"
                 >
-                  {item.post.title}
+                  {item.post.title ?? ""}
                 </Link>{" "}
                 中回复
               </p>
               <p
                 className="mt-1 break-words"
-                dangerouslySetInnerHTML={{ __html: item.reply.content }}
+                dangerouslySetInnerHTML={{ __html: item.reply.content ?? "" }}
               />
               <p className="text-xs text-gray-400 mt-1">
-                {item.reply.created_at.toString()} 点赞:{item.reply.n_likes}
+                {item.reply.created_at?.toString() ?? ""} 点赞:
+                {item.reply.n_likes ?? 0}
               </p>
             </div>
           );

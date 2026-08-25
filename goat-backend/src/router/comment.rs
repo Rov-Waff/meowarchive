@@ -9,12 +9,12 @@ use axum::{
 };
 use sea_orm::{
     ColumnTrait, EntityTrait, PaginatorTrait, QueryFilter, QueryOrder,
-    sea_query::{BinOper, Condition, Expr, ExprTrait, Func},
+    sea_query::{Alias, BinOper, Condition, Expr, ExprTrait, Func},
 };
 
 use crate::{
     AppState,
-    dtos::{CommentSearchDTO, CommentSearchPage, Pagination},
+    dtos::{CommentSearchDTO, CommentSearchPage, Pagination, SearchParams},
     entity,
 };
 
@@ -31,7 +31,7 @@ use crate::{
     )
 )]
 async fn search_content_handler(
-    keyword: Query<String>,
+    keyword: Query<SearchParams>,
     pagination: Query<Pagination>,
     state: State<Arc<AppState>>,
 ) -> Result<Json<CommentSearchPage>, (StatusCode, String)> {
@@ -43,13 +43,13 @@ async fn search_content_handler(
     }
     let tsvector = Expr::expr(
         Func::cust("to_tsvector")
-            .arg(Expr::val("zh_cn"))
+            .arg(Expr::val("zh_cn").cast_as(Alias::new("regconfig")))
             .arg(Expr::col(entity::comments::Column::Content)),
     );
     let tsquery = Expr::expr(
         Func::cust("to_tsquery")
-            .arg(Expr::val("zh_cn"))
-            .arg(Expr::val(keyword.0)),
+            .arg(Expr::val("zh_cn").cast_as(Alias::new("regconfig")))
+            .arg(Expr::val(keyword.keyword.clone())),
     );
     let cond = Condition::all().add(tsvector.binary(BinOper::Custom("@@"), tsquery));
     let data = entity::comments::Entity::find()

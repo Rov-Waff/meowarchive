@@ -29,6 +29,17 @@ pub mod router;
 
 #[tokio::main]
 async fn main() {
+    let banner = r#"
+  __  __                                        _     _           
+ |  \/  |                        /\            | |   (_)          
+ | \  / | ___  _____      __    /  \   _ __ ___| |__  ___   _____ 
+ | |\/| |/ _ \/ _ \ \ /\ / /   / /\ \ | '__/ __| '_ \| \ \ / / _ \
+ | |  | |  __/ (_) \ V  V /   / ____ \| | | (__| | | | |\ V /  __/
+ |_|  |_|\___|\___/ \_/\_/   /_/    \_\_|  \___|_| |_|_| \_/ \___|
+                                                                  
+                                                                  
+        "#;
+    println!("{}",banner);
     dotenvy::dotenv().ok();
     tracing_subscriber::registry()
         .with(tracing_subscriber::EnvFilter::from_default_env())
@@ -49,5 +60,7 @@ async fn main() {
     ))
     .await
     .unwrap();
+    
+    tracing::info!("Service has been started at 0.0.0.0:{}",env::var("SERVER_PORT").unwrap());
     axum::serve(listener, app).await.unwrap();
 }

@@ -2,9 +2,7 @@ import Link from "next/link";
 import { API_BASE } from "@/lib/api";
 
 const Board = async () => {
-  let boards: Array<Board> = await (
-    await fetch(`${API_BASE}/board/all`)
-  ).json();
+  let boards: Array<Board> = await (await fetch(`${API_BASE}/board`)).json();
   return (
     <>
       <p>板块列表... !?板块块版?!</p>
@@ -19,13 +17,13 @@ const Board = async () => {
               href={`/board/${item.id}`}
               className="text-lg font-semibold text-gray-800 hover:underline"
             >
-              {item.name}
+              {item.name ?? ""}
             </Link>
             <br />
             <p className="mt-1 text-sm text-gray-500">
               {item.is_hot ? <>热门</> : <></>}
-              讨论:{item.n_discussions}
-              帖子:{item.n_posts}
+              讨论:{item.n_discussions ?? 0}
+              帖子:{item.n_posts ?? 0}
             </p>
           </div>
         );

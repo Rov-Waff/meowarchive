@@ -96,7 +96,7 @@ No test framework is configured for the frontend.
 
 ## Known Bugs / Gotchas
 
-- **Rust `get_board_posts_handler`** (`goat-backend/src/router/board.rs`): `has_next`/`has_prev` are inverted (`has_next: page > 1`, `has_prev: page < total_page`), and `total` counts ALL posts, not just those matching `board_id`. Fix deliberately, not incidentally.
+- **Rust pagination flags** (fixed): `has_next`/`has_prev` were inverted in `get_board_posts_handler`, `get_all_posts`, `get_post_replies`; board's `total` also counted ALL posts. Correct semantics are `has_next: page < total_page`, `has_prev: page > 1`, and `total` filtered by board_id.
 - **Rust ID type drift**: path handlers take `u32` (`post_id`) but entities use `i64`; board paths use `i64`. Inconsistent casts throughout.
 - **Python `post.py`**: `has_next` uses `==` instead of `<` in `get_replies_by_post_id`; `PostDetailsDTO.n_views` is set from `res.n_comments`.
 - **Missing rows crash**: Python handlers use `.one()` without error handling (unknown id → 500). Rust handlers use `.one()` and map `None` → 404, so Rust is safer here.

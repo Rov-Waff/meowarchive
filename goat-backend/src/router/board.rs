@@ -83,6 +83,7 @@ async fn get_board_posts_handler(
     let db = state.db.clone();
 
     let total = entity::posts::Entity::find()
+        .filter(entity::posts::Column::BoardId.eq(*board_id))
         .count(&db)
         .await
         .map_err(|err| (StatusCode::INTERNAL_SERVER_ERROR, err.to_string()))?;
@@ -93,8 +94,8 @@ async fn get_board_posts_handler(
         Ok(Json(PostPage {
             current: page,
             total: total_page as u32,
-            has_next: page > 1,
-            has_prev: page < (total_page as u32),
+            has_next: page < (total_page as u32),
+            has_prev: page > 1,
             item: entity::posts::Entity::find()
                 .filter(entity::posts::Column::BoardId.eq(*board_id))
                 .order_by_id_asc()
