@@ -9,6 +9,7 @@ export default async function Home() {
         <p>感谢编程追梦者为我提供了这个站的favicon</p>
         <p>v1.1.0:基于PostgreSQL，做了一个简单的搜索功能，不一定好用<br />目前接口速度慢到极致，我实在没什么好办法（（</p>
 	<p>v1.1.1:更换favicon</p>
+		  <p>v2.0.0使用Rust重构整个后端，理论上API速度更快了 REWRITE IT IN RrrrrrrrUST</p>
       </div>
       <form
         action="/search"
