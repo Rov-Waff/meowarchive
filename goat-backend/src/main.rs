@@ -1,0 +1,66 @@
+use std::{env, sync::Arc};
+
+use axum::{Router, extract::FromRef};
+use dotenvy::var;
+use sea_orm::{Database, DatabaseConnection};
+use tokio::net::TcpListener;
+use tower::ServiceBuilder;
+use tower_http::trace::TraceLayer;
+use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
+
+use crate::router::router;
+use utoipa::OpenApi;
+use utoipa_swagger_ui::SwaggerUi;
+
+#[derive(Clone, Debug)]
+pub struct AppState {
+    db: DatabaseConnection,
+}
+impl FromRef<AppState> for DatabaseConnection {
+    fn from_ref(input: &AppState) -> DatabaseConnection {
+        input.db.clone()
+    }
+}
+
+pub mod api_doc;
+pub mod dtos;
+pub mod entity;
+pub mod router;
+
+#[tokio::main]
+async fn main() {
+    let banner = r#"
+  __  __                                        _     _           
+ |  \/  |                        /\            | |   (_)          
+ | \  / | ___  _____      __    /  \   _ __ ___| |__  ___   _____ 
+ | |\/| |/ _ \/ _ \ \ /\ / /   / /\ \ | '__/ __| '_ \| \ \ / / _ \
+ | |  | |  __/ (_) \ V  V /   / ____ \| | | (__| | | | |\ V /  __/
+ |_|  |_|\___|\___/ \_/\_/   /_/    \_\_|  \___|_| |_|_| \_/ \___|
+                                                                  
+                                                                  
+        "#;
+    println!("{}",banner);
+    dotenvy::dotenv().ok();
+    tracing_subscriber::registry()
+        .with(tracing_subscriber::EnvFilter::from_default_env())
+        .with(tracing_subscriber::fmt::layer())
+        .init();
+    let database = Database::connect(var("DATABASE_URL").expect("请提供数据库URL"))
+        .await
+        .expect("无法链接到数据库");
+    let state = Arc::new(AppState { db: database });
+    let app = Router::new()
+        .merge(router())
+        .merge(SwaggerUi::new("/swagger-ui").url("/api-doc/openapi.json", api_doc::ApiDoc::openapi()))
+        .layer(ServiceBuilder::new().layer(TraceLayer::new_for_http()))
+        .with_state(state);
+    let listener = TcpListener::bind(format!(
+        "0.0.0.0:{}",
+        env::var("SERVER_PORT").expect("No port provided")
+    ))
+    .await
+    .unwrap();
+    
+    tracing::info!("Service has been started at 0.0.0.0:{}",env::var("SERVER_PORT").unwrap());
+    axum::serve(listener, app).await.unwrap();
+}

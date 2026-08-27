@@ -11,14 +11,14 @@ const BoardPosts = async ({ searchParams, params }: Props) => {
   const { page = "1" } = await searchParams;
   const { id } = await params;
   let pageData: PageResult<Post> = await (
-    await fetch(`${API_BASE}/board/${id}/page?page_size=30&page_num=${page}`)
+    await fetch(`${API_BASE}/board/${id}/post?size=30&page=${page}`)
   ).json();
   return (
     <>
       <JumpComponent
         boardId={id}
-        current={pageData.current_page}
-        totalPage={pageData.total_page}
+        current={pageData.current}
+        totalPage={pageData.total}
       />
       <hr className="border-0 border-t border-gray-200 my-3.5" />
       {pageData.item.map((item) => {
@@ -31,11 +31,11 @@ const BoardPosts = async ({ searchParams, params }: Props) => {
               href={`/post/${item.id}`}
               className="font-semibold text-gray-800 hover:underline"
             >
-              {item.title}
+              {item.title ?? ""}
             </Link>
             <p className="mt-1 text-sm text-gray-500">
-              ID:{item.id} 阅读:{item.n_views} 评论:{item.n_comments} 回复:
-              {item.n_replies}
+              ID:{item.id} 阅读:{item.n_views ?? 0} 评论:{item.n_comments ?? 0}{" "}
+              回复:{item.n_replies ?? 0}
             </p>
             <p className="mt-1 text-sm text-gray-500">
               {item.is_authorized ? <>官方</> : <></>}{" "}

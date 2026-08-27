@@ -1,102 +1,80 @@
 interface Board {
-  name: string;
-  n_posts: number;
   id: number;
-  is_hot: boolean;
-  n_discussions: number;
+  name: string | null;
+  description: string | null;
+  is_hot: boolean | null;
+  n_posts: number | null;
+  n_discussions: number | null;
 }
-/*
- {
-      "id": 2116,
-      "ask_help_flag": 0,
-      "board_id": 5,
-      "board_name": "你问我答",
-      "created_at": "2017-02-13T17:15:42",
-      "is_authorized": false,
-      "is_featured": false,
-      "is_pinned": false,
-      "n_comments": 0,
-      "n_replies": 16,
-      "n_views": 133,
-      "title": "【求助】在线",
-      "tutorial_flag": 0,
-      "user_id": 194148,
-      "user": {
-        "nickname": "MAlopos",
-        "sex": 0,
-        "doing": "https://shequ.codemao.cn/wiki/novel/cover/116848\n小说求收藏",
-        "level": 1,
-        "collection_times": 1312,
-        "praise_times": 2749,
-        "id": 194148,
-        "description": "我是小天狼星",
-        "avatar": "https://cdn-community.codemao.cn/47/community/d2ViXzEwMDFfMTk0MTQ4XzE5NDE0OF8xNjEzMzExNDQ1ODY5XzZlYmRkN2E0.jpeg",
-        "forked_times": 2999,
-        "view_times": 168512
-      }
-*/
+
 interface User {
   id: number;
-  nickname: string;
-  avatar: string;
-  sex: number;
-  doing: string;
-  level: number;
-  collection_times: number;
-  praise_times: number;
-  description: string;
-  forked_times: number;
-  view_times: number;
+  nickname: string | null;
+  avatar: string | null;
+  sex: number | null;
+  doing: string | null;
+  level: number | null;
+  collection_times: number | null;
+  praise_times: number | null;
+  description: string | null;
+  forked_times: number | null;
+  view_times: number | null;
 }
 
 interface Post {
   id: number;
-  ask_help_flag: number;
-  board_id: number;
-  board_name: string;
-  created_at: Date;
-  is_authorized: boolean;
-  is_pinned: boolean;
-  n_comments: number;
-  n_replies: number;
-  n_views: number;
-  tutorial_flag: 0;
+  ask_help_flag: number | null;
+  board_id: number | null;
+  board_name: string | null;
+  content: string | null;
+  created_at: string | null;
+  is_authorized: boolean | null;
+  is_featured: boolean | null;
+  is_pinned: boolean | null;
+  n_comments: number | null;
+  n_replies: number | null;
+  n_views: number | null;
+  title: string | null;
+  tutorial_flag: number | null;
+  updated_at: string | null;
+  user_id: number | null;
+}
+
+interface PostDetail {
+  post: Post;
   user: User;
-  title: string;
-  content: string;
 }
 
 interface PageResult<T> {
-  total_page: number;
-  current_page: number;
+  current: number;
+  total: number;
   has_prev: boolean;
   has_next: boolean;
   item: Array<T>;
 }
 
 interface Reply {
-  content: string;
-  created_at: Date;
-  is_top: boolean;
-  n_likes: number;
-  update_at: Date;
   id: number;
-  is_liked: boolean;
-  n_comments: number;
-  post_id: number;
-  user_id: number;
+  content: string | null;
+  created_at: string | null;
+  is_liked: boolean | null;
+  is_top: boolean | null;
+  n_comments: number | null;
+  n_likes: number | null;
+  post_id: number | null;
+  update_at: string | null;
+  user_id: number | null;
 }
 
 interface Comment {
-  is_liked: boolean;
-  content: string;
-  reply_id: number;
-  user_id: number;
   id: number;
-  created_at: Date;
-  n_likes: number;
-  reply_user_id: number;
-  user: User;
+  content: string | null;
+  created_at: string | null;
+  is_liked: boolean | null;
+  n_likes: number | null;
+  reply_id: number | null;
+  reply_user_id: number | null;
+  user_id: number | null;
 }
 
 interface ReplyDTO {
@@ -119,27 +97,27 @@ interface UserCommentDTO {
 }
 
 interface PostSearchItem {
-  title: string;
   id: number;
+  title: string | null;
   user: User;
-  n_replies: number;
-  n_view: number;
-  n_comments: number;
+  n_replies: number | null;
+  n_view: number | null;
+  n_comments: number | null;
 }
 
 interface CommentSearchItem {
   id: number;
-  content: string;
-  created_at: Date;
-  n_likes: number;
+  content: string | null;
+  created_at: string | null;
+  n_likes: number | null;
   user: User;
 }
 
 interface ReplySearchItem {
   id: number;
-  content: string;
-  created_at: Date;
-  n_likes: number;
-  n_comments: number;
+  content: string | null;
+  created_at: string | null;
+  n_likes: number | null;
+  n_comments: number | null;
   user: User;
 }

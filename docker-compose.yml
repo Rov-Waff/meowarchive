@@ -1,37 +1,10 @@
-
 services:
   backend:
-    image: xiaole6324/meowarchive-backend:1.0.2
-    container_name: backend
+    image: xiaole6324/meow-arch-goat:0.1.0
+    container_name: meow-arch-goat-backend
     ports:
-      - 8000:8000
-    networks:
-      - meowarchive-net
-    depends_on:
-      - pgsql
-    env_file:
-      - .env.bk
-  pgsql:
-    image: docker.1ms.run/library/postgres:18
-    container_name: pgsql
-    ports:
-      - 5432:5432
-    networks:
-      - meowarchive-net
-    env_file:
-      - .env.pg
-  nginx:
-    image: library/nginx:alpine
-    container_name: nginx
-    ports:
-      - 80:80
-      - 443:443
-    networks:
-      - meowarchive-net
-    volumes:
-      - /etc/nginx/conf.d:/home/xiaole233/Meowarchive/nginx:rw
-    depends_on:
-      - backend
-networks:
-  meowarchive-net:
-    driver: bridge
+      - 8080:8080
+    environment:
+      - SERVER_PORT=8080
+      - DATABASE_URL=postgresql://codemao_forum:123456@host.docker.internal:5432/codemao_forum
+      - RUST_LOG=INFO
