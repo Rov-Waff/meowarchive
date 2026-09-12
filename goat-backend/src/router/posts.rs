@@ -8,7 +8,7 @@ use axum::{
 };
 use sea_orm::{
     ColumnTrait, EntityTrait, PaginatorTrait, QueryFilter, QueryOrder,
-    sea_query::{Alias, BinOper, Condition, Expr, ExprTrait, Func},
+    sea_query::{BinOper, Condition, Expr, ExprTrait, Func},
 };
 
 use crate::{
@@ -184,12 +184,12 @@ async fn search_posts_handler(
     }
     let tsvector = Expr::expr(
         Func::cust("to_tsvector")
-            .arg(Expr::val("zh_cn").cast_as(Alias::new("regconfig")))
-            .arg(Expr::col(column)),
+            .arg(Expr::cust("'zh_cn'::regconfig"))
+            .arg(Func::cust("strip_html").arg(Expr::col(column))),
     );
     let tsquery = Expr::expr(
         Func::cust("to_tsquery")
-            .arg(Expr::val("zh_cn").cast_as(Alias::new("regconfig")))
+            .arg(Expr::cust("'zh_cn'::regconfig"))
             .arg(Expr::val(keyword.keyword.clone())),
     );
     let cond = Condition::all().add(tsvector.binary(BinOper::Custom("@@"), tsquery));

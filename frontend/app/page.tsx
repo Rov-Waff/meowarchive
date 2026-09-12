@@ -32,6 +32,7 @@ export default async function Home() {
           <option value="post_content">帖子正文</option>
           <option value="comment">评论</option>
           <option value="reply">回复</option>
+          <option value="user">用户</option>
         </select>
         <button
           type="submit"
