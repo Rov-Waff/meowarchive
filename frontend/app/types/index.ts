@@ -89,6 +89,11 @@ interface UserReplyDTO {
   user: User;
 }
 
+interface UserPostDTO {
+  post: Post;
+  user: User;
+}
+
 interface UserCommentDTO {
   comment: Comment;
   reply: Reply;

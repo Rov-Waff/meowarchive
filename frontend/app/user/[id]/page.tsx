@@ -16,7 +16,7 @@ const UserDetail = async ({
   const userData: User = await (await fetch(`${API_BASE}/user/` + id)).json();
 
   let replyData: PageResult<UserReplyDTO> | null = null;
-  let postData: PageResult<Post> | null = null;
+  let postData: PageResult<UserPostDTO> | null = null;
   let commentData: PageResult<UserCommentDTO> | null = null;
 
   if (activeTab === "posts") {
@@ -118,24 +118,24 @@ const UserDetail = async ({
         postData.item.map((item) => {
           return (
             <div
-              key={item.id}
+              key={item.post.id}
               className="bg-white border border-gray-200 rounded-[10px] px-4 py-3 my-3 shadow-sm transition hover:shadow-md hover:-translate-y-px"
             >
               <Link
-                href={`/post/${item.id}`}
+                href={`/post/${item.post.id}`}
                 className="font-semibold text-gray-800 hover:underline"
               >
-                {item.title ?? ""}
+                {item.post.title ?? ""}
               </Link>
               <p className="mt-1 text-sm text-gray-500">
-                ID:{item.id} 阅读:{item.n_views ?? 0} 评论:{item.n_comments ?? 0}{" "}
-                回复:{item.n_replies ?? 0}
+                ID:{item.post.id} 阅读:{item.post.n_views ?? 0} 评论:
+                {item.post.n_comments ?? 0} 回复:{item.post.n_replies ?? 0}
               </p>
               <p className="mt-1 text-sm text-gray-500">
-                {item.is_authorized ? <>官方</> : <></>}{" "}
-                {item.is_pinned ? <>置顶</> : <></>}
-                {item.ask_help_flag ? <>求助</> : <></>}{" "}
-                {item.tutorial_flag ? <>教程</> : <></>}
+                {item.post.is_authorized ? <>官方</> : <></>}{" "}
+                {item.post.is_pinned ? <>置顶</> : <></>}
+                {item.post.ask_help_flag ? <>求助</> : <></>}{" "}
+                {item.post.tutorial_flag ? <>教程</> : <></>}
               </p>
             </div>
           );

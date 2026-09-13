@@ -4,12 +4,30 @@ COPY Cargo.toml ./
 COPY Cargo.lock ./
 COPY src ./src
 
-ENV CARGO_REGISTRIES_CRATES_IO_PROTOCOL=sparse
-ENV CARGO_REGISTRIES_CRATES_IO_REPLACE_WITH=rsproxy
-ENV CARGO_REGISTRIES_RSPROXY_INDEX=https://rsproxy.cn/index
-#ENV SWAGGER_UI_DOWNLOAD_URL=https://gh.jasonzeng.dev/https://github.com/swagger-api/swagger-ui/archive/refs/tags/v5.17.14.zip
+# 配置 crates.io 走 rsproxy（写文件比环境变量更稳）
+RUN mkdir -p /usr/local/cargo && \
+    printf '%s\n' \
+    '[source.crates-io]' \
+    'replace-with = "rsproxy"' \
+    '' \
+    '[source.rsproxy]' \
+    'registry = "sparse+https://rsproxy.cn/index/"' \
+    '' \
+    '[registries.rsproxy]' \
+    'index = "sparse+https://rsproxy.cn/index/"' \
+    '' \
+    '[net]' \
+    'git-fetch-with-cli = true' \
+    > /usr/local/cargo/config.toml
+
+# 替换 Debian apt 源为清华镜像
+RUN sed -i 's|deb.debian.org|mirrors.tuna.tsinghua.edu.cn|g' /etc/apt/sources.list.d/debian.sources 2>/dev/null || \
+    sed -i 's|deb.debian.org|mirrors.tuna.tsinghua.edu.cn|g' /etc/apt/sources.list
+
 RUN apt-get update && \
-    apt-get install -y curl 
+    apt-get install -y --no-install-recommends curl && \
+    rm -rf /var/lib/apt/lists/*
+
 RUN ["cargo", "build", "--release"]
 
 FROM docker.1ms.run/library/debian:bookworm-slim
