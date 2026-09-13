@@ -8,6 +8,7 @@ const SCOPE_ENDPOINTS: Record<string, { path: string; label: string }> = {
   post_content: { path: "/post/search/content", label: "帖子正文" },
   comment: { path: "/comment/search/content", label: "评论" },
   reply: { path: "/reply/search/content", label: "回复" },
+  user: { path: "/user/search", label: "用户" },
 };
 
 const PAGE_SIZE = 30;
@@ -15,7 +16,8 @@ const PAGE_SIZE = 30;
 type SearchResult =
   | { scope: "post"; data: PageResult<PostSearchItem> }
   | { scope: "comment"; data: PageResult<CommentSearchItem> }
-  | { scope: "reply"; data: PageResult<ReplySearchItem> };
+  | { scope: "reply"; data: PageResult<ReplySearchItem> }
+  | { scope: "user"; data: PageResult<User> };
 
 function SearchPagination({
   keyword,
@@ -98,6 +100,8 @@ export default async function SearchPage({
       result = { scope: "comment", data: await res.json() };
     } else if (activeScope === "reply") {
       result = { scope: "reply", data: await res.json() };
+    } else if (activeScope === "user") {
+      result = { scope: "user", data: await res.json() };
     } else {
       result = { scope: "post", data: await res.json() };
     }
@@ -201,6 +205,51 @@ export default async function SearchPage({
               点赞:{i.n_likes ?? 0} 评论:{i.n_comments ?? 0} 时间:
               {i.created_at?.toString() ?? ""}
             </p>
+          </div>
+        ))}
+      </>
+    );
+  }
+
+  if (result.scope === "user") {
+    return (
+      <>
+        <h2 className="text-[1.4rem] my-2">
+          搜索范围:{endpoint.label} 关键词:{keyword}
+        </h2>
+        <SearchPagination
+          keyword={keyword}
+          scope={activeScope}
+          current={result.data.current}
+          totalPage={result.data.total}
+          hasPrev={result.data.has_prev}
+          hasNext={result.data.has_next}
+        />
+        {result.data.item.map((item) => (
+          <div
+            key={item.id}
+            className="bg-white border border-gray-200 rounded-[10px] px-4 py-3 my-3 shadow-sm flex items-center gap-4 transition hover:shadow-md hover:-translate-y-px"
+          >
+            <img
+              src={item.avatar ?? ""}
+              alt={item.nickname ?? ""}
+              className="w-14 h-14 rounded-full object-cover bg-gray-100"
+            />
+            <div className="min-w-0 flex-1">
+              <Link
+                href={`/user/${item.id}`}
+                className="font-semibold text-gray-800 hover:underline"
+              >
+                {item.nickname ?? ""}
+              </Link>
+              <p className="text-sm text-gray-500 truncate">
+                {item.description ?? ""}
+              </p>
+              <p className="text-xs text-gray-400">
+                Lv.{item.level ?? 0} 获赞:{item.praise_times ?? 0} 收藏:
+                {item.collection_times ?? 0}
+              </p>
+            </div>
           </div>
         ))}
       </>

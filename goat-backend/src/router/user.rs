@@ -12,8 +12,8 @@ use sea_orm::{ColumnTrait, EntityTrait, PaginatorTrait, QueryFilter, QueryOrder}
 use crate::{
     AppState,
     dtos::{
-        Pagination, UserCommentDTO, UserCommentPage, UserPage, UserPostDTO, UserPostPage,
-        UserReplyDTO, UserReplyPage,
+        PageResult, Pagination, SearchParams, UserCommentDTO, UserCommentPage, UserPage,
+        UserPostDTO, UserPostPage, UserReplyDTO, UserReplyPage,
     },
     entity,
 };
@@ -308,9 +308,38 @@ async fn get_user_comment_handler(
     }))
 }
 
+async fn search_user_handler(
+    keyword: Query<SearchParams>,
+    pagination: Query<Pagination>,
+    state: State<Arc<AppState>>,
+) -> Result<Json<PageResult<entity::user::Model>>, (StatusCode, String)> {
+    let page = pagination.page;
+    let size = pagination.size;
+    let db = state.db.clone();
+    let pagination = entity::user::Entity::find()
+        .filter(entity::user::Column::Nickname.contains(keyword.keyword.clone()))
+        .paginate(&db, size as u64);
+    let count = pagination
+        .num_pages()
+        .await
+        .map_err(|_| (StatusCode::INTERNAL_SERVER_ERROR, "DbErr".to_string()))?;
+    let models = pagination
+        .fetch_page((page - 1) as u64)
+        .await
+        .map_err(|_| (StatusCode::INTERNAL_SERVER_ERROR, "DbErr".to_string()))?;
+    Ok(Json(PageResult {
+        current: page,
+        total: count as u32,
+        has_next: page < count as u32,
+        has_prev: page > 1,
+        item: models,
+    }))
+}
+
 pub fn user_router() -> Router<Arc<AppState>> {
     Router::new()
         .route("/", get(get_all_user_handler))
+        .route("/search", get(search_user_handler))
         .route("/{user_id}", get(get_user_info_handler))
         .route("/{user_id}/reply", get(get_user_reply_handler))
         .route("/{user_id}/posts", get(get_user_post_handler))

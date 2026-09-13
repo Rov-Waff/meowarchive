@@ -96,6 +96,13 @@ interface UserCommentDTO {
   user: User;
 }
 
+interface Count {
+  posts: number;
+  replies: number;
+  comments: number;
+  user: number;
+}
+
 interface PostSearchItem {
   id: number;
   title: string | null;

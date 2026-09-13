@@ -106,3 +106,11 @@ pub struct CommentSearchDTO {
     pub n_likes: Option<i32>,
     pub user: entity::user::Model,
 }
+
+#[derive(Deserialize,Serialize,utoipa::ToSchema)]
+pub struct CountDTO{
+    pub posts:u64,
+    pub replies:u64,
+    pub comments:u64,
+    pub user:u64
+}
